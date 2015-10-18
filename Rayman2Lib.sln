@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rayman2Lib", "Rayman2Lib\Rayman2Lib.csproj", "{5354D159-64D2-4061-B38C-863DDE607AE5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CNTExplorer", "CNTExplorer\CNTExplorer.csproj", "{811763AF-6F60-4BF6-98D9-8C32ACEF7101}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DATReader", "DATReader\DATReader.csproj", "{EBFF6F91-F35C-4F49-A7DB-4994FB7D9DE0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5354D159-64D2-4061-B38C-863DDE607AE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5354D159-64D2-4061-B38C-863DDE607AE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5354D159-64D2-4061-B38C-863DDE607AE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5354D159-64D2-4061-B38C-863DDE607AE5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{811763AF-6F60-4BF6-98D9-8C32ACEF7101}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{811763AF-6F60-4BF6-98D9-8C32ACEF7101}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{811763AF-6F60-4BF6-98D9-8C32ACEF7101}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{811763AF-6F60-4BF6-98D9-8C32ACEF7101}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EBFF6F91-F35C-4F49-A7DB-4994FB7D9DE0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBFF6F91-F35C-4F49-A7DB-4994FB7D9DE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EBFF6F91-F35C-4F49-A7DB-4994FB7D9DE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EBFF6F91-F35C-4F49-A7DB-4994FB7D9DE0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
