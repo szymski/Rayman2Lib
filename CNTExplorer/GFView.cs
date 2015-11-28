@@ -24,7 +24,7 @@ namespace CNTExplorer
         private void GFView_Load(object sender, EventArgs e)
         {
             pictureBox1.Image = gfFile.GetBitmap();
-            gfInfoLabel.Text = $"Width: {gfFile.width} Height: {gfFile.height}, {(gfFile.alphaChannel ? "Transparent" : "Not transparent")}";
+            gfInfoLabel.Text = $"Width: {gfFile.width} Height: {gfFile.height}, {(gfFile.isTransparent ? "Transparent" : "Not transparent")}";
         }
     }
 }

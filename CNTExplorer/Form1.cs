@@ -20,9 +20,12 @@ namespace CNTExplorer
             InitializeComponent();
         }
 
+        string tempFolder = Path.GetTempPath() + "CNTExplorer";
+
         private void Form1_Load(object sender, EventArgs e)
         {
-            //LoadCNT(@"D:\GOG Games\Rayman 2\Data\Textures.cnt");
+            Directory.CreateDirectory(tempFolder);
+            RegisterFileWatcher();
         }
 
         CNTFile cnt;
@@ -30,6 +33,8 @@ namespace CNTExplorer
 
         void LoadCNT(string filename)
         {
+            watchedFiles.Clear();
+
             cnt = CNTFile.LoadFromFile(filename);
 
             curDir = "\\";
@@ -200,6 +205,23 @@ namespace CNTExplorer
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
             MessageBox.Show("A tool made with love for Rayman 2 fans.\nSoon, it will be possible to modify textures.\n\nBy Szymekk.");
+        }
+
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var files = new List<CNTFile.SaveFileStruct>();
+
+            foreach (var file in cnt.fileList)
+            {
+                files.Add(new CNTFile.SaveFileStruct()
+                {
+                    name = file.name,
+                    dir = file.directory,
+                    data = cnt.GetFileBytes(file.directory + "\\" + file.name)
+                });
+            }
+
+            CNTFile.Save(File.Create("Saved.cnt"), files);
         }
     }
 }

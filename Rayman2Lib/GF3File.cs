@@ -32,13 +32,13 @@ namespace Rayman2Lib
 
     */
 
-    public class GFFile
+    public class GF3File
     {
         public int width, height;
         public bool isTransparent = false;
         public Color[,] pixels;
 
-        public GFFile(Stream stream)
+        public GF3File(Stream stream)
         {
             BinaryReader r = new BinaryReader(stream);
 

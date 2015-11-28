@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{811763AF-6F60-4BF6-98D9-8C32ACEF7101}</ProjectGuid>
+    <ProjectGuid>{824CCB03-6DE1-479D-8A67-F05F46C96DC3}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CNTExplorer</RootNamespace>
-    <AssemblyName>CNTExplorer</AssemblyName>
+    <RootNamespace>SNDReader</RootNamespace>
+    <AssemblyName>SNDReader</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -51,25 +51,10 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="Form1Modifying.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GFView.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GFView.Designer.cs">
-      <DependentUpon>GFView.cs</DependentUpon>
-    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Form1Modifying.resx">
-      <DependentUpon>Form1Modifying.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GFView.resx">
-      <DependentUpon>GFView.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -92,12 +77,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Rayman2Lib\Rayman2Lib.csproj">
-      <Project>{5354d159-64d2-4061-b38c-863dde607ae5}</Project>
-      <Name>Rayman2Lib</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
