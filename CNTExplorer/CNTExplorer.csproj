@@ -65,9 +65,6 @@
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Form1Modifying.resx">
-      <DependentUpon>Form1Modifying.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="GFView.resx">
       <DependentUpon>GFView.cs</DependentUpon>
     </EmbeddedResource>

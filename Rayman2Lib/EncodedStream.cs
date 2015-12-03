@@ -12,7 +12,7 @@ namespace Rayman2Lib
     {
         byte[] data;
 
-        uint magic = 1790299257;
+        public uint magic = 1790299257;
 
         public EncodedStream(byte[] data)
         {

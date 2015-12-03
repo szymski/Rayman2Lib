@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rayman2Lib", "Rayman2Lib\Rayman2Lib.csproj", "{5354D159-64D2-4061-B38C-863DDE607AE5}"
 EndProject
@@ -9,11 +9,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CNTExplorer", "CNTExplorer\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DATReader", "DATReader\DATReader.csproj", "{EBFF6F91-F35C-4F49-A7DB-4994FB7D9DE0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BNKReader", "BNKReader\BNKReader.csproj", "{387FE3BC-64A3-4C9A-B719-A8F02081AF58}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BNMReader", "BNMReader\BNMReader.csproj", "{387FE3BC-64A3-4C9A-B719-A8F02081AF58}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SNAReader", "SNAReader\SNAReader.csproj", "{824CCB03-6DE1-479D-8A67-F05F46C96DC3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileDecoder", "FileDecoder\FileDecoder.csproj", "{A675F755-390F-4D2E-B278-5726299A21F2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DSBDecompiler", "DSBDecompiler\DSBDecompiler.csproj", "{95443B6F-5C55-404A-A03F-A00BD6C2BF6F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{A675F755-390F-4D2E-B278-5726299A21F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A675F755-390F-4D2E-B278-5726299A21F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A675F755-390F-4D2E-B278-5726299A21F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95443B6F-5C55-404A-A03F-A00BD6C2BF6F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95443B6F-5C55-404A-A03F-A00BD6C2BF6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95443B6F-5C55-404A-A03F-A00BD6C2BF6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95443B6F-5C55-404A-A03F-A00BD6C2BF6F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
