@@ -51,7 +51,8 @@ namespace Rayman2Lib
         {
             this.data = data;
 
-            BinaryReader r = new BinaryReader(new MemoryStream(data));
+            var stream = new MemoryStream(data);
+            var r = new BinaryReader(stream);
 
             // Header
             var field_0 = r.ReadInt32();
@@ -103,9 +104,16 @@ namespace Rayman2Lib
                     // Here begin file names
                     for (int i = 0; i < field_10; i++)
                     {
-                        var someValue = mr.ReadInt32();
+                        //MessageBox.Show("Offset: " + stream.Position.ToString("X8"));
+                        var id = mr.ReadByte();
+                        var someValue1 = mr.ReadByte();
+                        var someValue2 = mr.ReadByte();
+                        var someValue3 = mr.ReadByte();
                         int type = mr.ReadInt32();
-                        mr.ReadBytes(4);
+                        var someValue4 = mr.ReadByte();
+                        var someValue5 = mr.ReadByte();
+                        var someValue6 = mr.ReadByte();
+                        var someValue7 = mr.ReadByte();
                         var length = mr.ReadInt32();
                         if (type == 0xA)
                         {
@@ -120,7 +128,7 @@ namespace Rayman2Lib
                         else
                             mr.ReadBytes(44);
                         var sampleRate = mr.ReadInt32();
-                        mr.ReadBytes(8);
+                        var someBytes = mr.ReadBytes(8);
                         //MessageBox.Show((44 + r.BaseStream.Position).ToString());
                         var name = Encoding.ASCII.GetString(mr.ReadBytes(20));
                         name = name.Substring(0, name.IndexOf((char)0x00));
@@ -141,6 +149,23 @@ namespace Rayman2Lib
                             length = length,
                             data = r.ReadBytes(length)
                         });
+
+                        if (name.IndexOf("ry_globo") != -1)
+                        {
+                            var builder = new StringBuilder();
+
+                            builder.AppendLine("Id:" + id.ToString("X8"));
+                            builder.AppendLine("someValue1:" + someValue1.ToString("X8"));
+                            builder.AppendLine("someValue2:" + someValue2.ToString("X8"));
+                            builder.AppendLine("someValue3:" + someValue3.ToString("X8"));
+                            builder.AppendLine("someValue4:" + someValue4.ToString("X8"));
+                            builder.AppendLine("someValue5:" + someValue5.ToString("X8"));
+                            builder.AppendLine("someValue6:" + someValue6.ToString("X8"));
+                            builder.AppendLine("someValue7:" + someValue7.ToString("X8"));
+                            builder.AppendLine("someBytes:" + someBytes.Select(b => b.ToString("X2")).Aggregate((a, b) => a + " " + b));
+
+                            MessageBox.Show(builder.ToString());
+                        }
                     }
                     //MessageBox.Show((44 + mr.BaseStream.Position).ToString());
                 }

@@ -31,7 +31,20 @@ namespace Rayman2Lib
 
         public override long Seek(long offset, SeekOrigin origin)
         {
+            if (origin == SeekOrigin.Begin)
+                Position = offset;
+                    else
+                Position += offset;
+            return Position;
+        }
+
+        public long SeekWithUpdatedMagic(long offset)
+        {
             Position += offset;
+
+            for(int i = 0; i < offset; i++)
+                magic = (uint)(16807 * (magic ^ 0x75BD924) - 0x7FFFFFFF * ((magic ^ 0x75BD924u) / 0x1F31D));
+
             return Position;
         }
 

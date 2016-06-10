@@ -29,5 +29,16 @@ namespace Rayman2Lib
             r.ReadBytes(length - len);
             return str;
         }
+
+        public static string ReadNullTermStringWithLength(this BinaryReader r, int length)
+        {
+            var str = "";
+            char c;
+            int len = 0;
+            while (len++ < length && (c = r.ReadChar()) != 0x00)
+                str += c;
+            r.ReadBytes(length - len);
+            return str;
+        }
     }
 }

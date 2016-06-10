@@ -25,7 +25,7 @@ namespace DSBDecompiler
         {
             try
             {
-                DecompileDsb(@"D:\GOG Games\Rayman 2\Data\Game.dsb");
+                DecompileDsb(@"F:\Projects\Rayman2 Tools\Rayman2Lib\SNAReader\bin\Debug\sna_part_5_2.bin");
                 //DecompileDsb(@"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\Raycap\Raycap.dsb");
             }
             catch

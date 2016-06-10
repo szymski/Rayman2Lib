@@ -27,6 +27,8 @@ namespace CNTExplorer
                     {
                         cnt.fileList.Remove(watchedFiles[args.FullPath]);
 
+                       // Trace.WriteLine($"File {} has been modified");
+
                         UpdateDirectory();
                     }));
                 }

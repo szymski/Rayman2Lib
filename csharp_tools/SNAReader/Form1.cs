@@ -21,10 +21,10 @@ namespace SNAReader
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            new SNAFile(File.ReadAllBytes(@"D:\GOG Games\Rayman 2\Data\World\Levels\Fix.sna.bak"));
-            //new SNAFile(File.ReadAllBytes(@"D:\GOG Games\Rayman 2\Data\World\Levels\Menu\Menu.sna"));
+            var sna = new SNAFile(File.ReadAllBytes(@"D:\GOG Games\Rayman 2\Data\World\Levels\Learn_30\Learn_30.sna"));
+            richTextBox1.AppendText(sna.ToString());
 
-            Close();
+            //Close();
         }
     }
 }

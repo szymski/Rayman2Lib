@@ -20,7 +20,7 @@ namespace Rayman2Lib
             13  - waypoints, probably events, triggers
             14  - language
 
-        File structure tructure:
+        File structure:
             4 bytes - magic number (no encoding)
             x bytes - part
             
@@ -39,12 +39,17 @@ namespace Rayman2Lib
 
     public class SNAFile
     {
-        byte[] data;
-
-        bool ParseSNA3(int a, int b)
+        struct PartStruct
         {
-            return a > 0;
+            public long position;
+            public byte partId;
+            public long size;
         }
+
+        byte[] data;
+        List<PartStruct> parts = new List<PartStruct>();
+
+        public Dictionary<int, long> gptRelocationIdToPartPosition = new Dictionary<int, long>();
 
         public SNAFile(byte[] data)
         {
@@ -56,6 +61,8 @@ namespace Rayman2Lib
 
             do
             {
+                long position = stream.Position;
+
                 var partId = r.ReadByte();
                 var memorySomething = r.ReadByte();
                 var v32 = r.ReadByte();
@@ -68,13 +75,26 @@ namespace Rayman2Lib
 
                 //MessageBox.Show(toMove.ToString("X8"));
 
+                //MessageBox.Show((10 * partId + memorySomething).ToString());
+                if (!gptRelocationIdToPartPosition.ContainsKey(10*partId + memorySomething))
+                    gptRelocationIdToPartPosition.Add(10*partId + memorySomething, position);
+                else
+                    gptRelocationIdToPartPosition[10*partId + memorySomething] = position;
+
                 if (ParseSNA3(partId, memorySomething))
                 {
                     if (dataSize > 0)
                     {
                         byte[] v41 = r.ReadBytes(dataSize);
+
+                        parts.Add(new PartStruct()
+                        {
+                            position = position,
+                            partId = partId,
+                            size = dataSize
+                        });
+
                         File.WriteAllBytes($"sna_part_{partId}_{memorySomething}.bin", v41);
-                        MessageBox.Show("asd");
                     }
                 }
                 else if (dataSize > 0)
@@ -86,5 +106,27 @@ namespace Rayman2Lib
             }
             while (stream.Position < stream.Length);
         }
+
+        bool ParseSNA3(int a, int b)
+        {
+            return a > 0;
+        }
+
+        public override string ToString()
+        {
+            var builder = new StringBuilder();
+
+            builder.AppendLine("// SNA decoder, very very WIP");
+            builder.AppendLine("// File name: \n");
+
+            foreach (var part in parts)
+            {
+                builder.AppendLine($"{part.position.ToString("X8")} - {(part.position + part.size).ToString("X8")}: Part id {part.partId}");
+                builder.AppendLine("\n");
+            }
+
+            return builder.ToString();
+        }
+
     }
 }
