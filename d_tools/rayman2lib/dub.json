@@ -1,9 +1,9 @@
 {
-	"name": "snareader",
+	"name": "rayman2lib",
 	"authors": [
 		"Szymon Jankowski"
 	],
-	"description": "Rayman 2 SNA reader.",
+	"description": "Rayman 2 Library.",
 	"copyright": "Copyright 2016, Szymon Jankowski",
 	"license": "MIT"
 }
