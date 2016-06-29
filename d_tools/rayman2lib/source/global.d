@@ -1,10 +1,10 @@
 ﻿module global;
 
-import snaformat;
+import formats.sna;
 
 SNAFormat[] loadedSnas;
 
-struct PointerRelocationInfo { ubyte byte0, byte1, byte2, byte3, byte4, byte5, byte6, byte7; }
+struct PointerRelocationInfo { uint dword0; ubyte byte4, byte5, byte6, byte7; }
 
 uint pointerRelocationInfoIndex = 0;
 PointerRelocationInfo[10240] relocationKeyValues; 

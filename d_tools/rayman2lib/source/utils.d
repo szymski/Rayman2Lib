@@ -40,7 +40,7 @@ void printMemory(void* pointer, size_t size, ubyte inOneLine = 16) {
 		for(int i = 0; i < times; i++) {
 			string hexStr = (*(cast(ubyte*)pointer)).to!string(16);
 
-			if(hexStr.length == 1)
+			if(hexStr.length == 1) // Add zero on the left, if necessary
 				hexStr = "0" ~ hexStr;
 
 			write(hexStr, " ");
@@ -62,4 +62,9 @@ T readType(T)(File f) {
 	T[1] array;
 	f.rawRead(array);
 	return array[0];
+}
+
+void printStruct(T)(T obj) {
+	foreach(member; __traits(allMembers, T))
+		mixin("writeln(\"" ~ member ~ "\", \":\", obj." ~ member ~ ");");
 }
