@@ -1,12 +1,13 @@
 ﻿module formats.gpt;
 
-import std.stdio, std.conv;
+import std.stdio, std.conv, consoled, core.sys.windows.windows;
 import std.file : read;
 import decoder, utils, global;
 
 class GPTFormat
 {
 	ubyte[] data;
+	MemoryReader r;
 	
 	this(string filename)
 	{
@@ -15,26 +16,23 @@ class GPTFormat
 	
 	this(ubyte[] data)
 	{
-		writeln("Parsing GPT");
+		writecln(Fg.lightMagenta, "Parsing GPT");
 		this.data = data;
 		parse();
 	}
 	
 	private void parse() {
-		auto r = new MemoryReader(data);
+		r = new MemoryReader(data);
+	}
 
-		// TODO: Debug
-		printMemory(relocationKeyValues.ptr, 128, 8);
-
-		auto ptr = r.readPointer();
-		writeln(ptr, " - ", *ptr);
-		ptr = r.readPointer();
+	T readPointer(T = ubyte*)() {
+		return r.readPointer!T;
 	}
 }
 
 T readPointer(T = ubyte*)(MemoryReader r) {
+	uint dword0 = relocationKeyValues[pointerRelocationInfoIndex].dword0;
 	ubyte byte4 = relocationKeyValues[pointerRelocationInfoIndex].byte4, byte5 = relocationKeyValues[pointerRelocationInfoIndex].byte5;
-	pointerRelocationInfoIndex++;
 	
 	auto relativeAddress = r.read!uint;
 	uint result = relativeAddress;
@@ -45,10 +43,20 @@ T readPointer(T = ubyte*)(MemoryReader r) {
 	uint v1 = relativeAddress + 10 * byte4;
 	v1 &= 0xFF;
 
-	writeln("Before relocation: ", cast(void*)result);
-	writeln("byte4: ", byte4, "\tbyte5: ", byte5, "\tlocationInOffsetArray: 0x", v1.to!string(16));
-	result += cast(uint)gptPointerRelocation[v1];
-	writeln("After relocation: ", cast(void*)result);
+	if(result == dword0) {
+		pointerRelocationInfoIndex++;
+		//writeln("byte4: ", byte4, "\tbyte5: ", byte5, "\tlocationInOffsetArray: 0x", v1.to!string(16));
+		auto before = result;
+		result += cast(uint)gptPointerRelocation[v1];
+		writec(Fg.lightGreen, "GPT Relocation: ", Fg.lightYellow, "Raw", Fg.white, " = 0x", before.to!string(16), Fg.lightYellow, "\t\tRelocated", Fg.white, " = 0x", cast(void*)result);
+		if(!IsBadReadPtr(cast(void*)result, 1))
+			writec(Fg.lightBlue, "\tValue pointing at ", Fg.white, "0x", (*(cast(ubyte*)result)).to!string(16));
+		writeln();
+	}
+	else
+		writecln(Fg.lightGreen, "GPT Relocation: ", Fg.lightYellow, "Raw", Fg.white, " = 0x", result.to!string(16), Fg.red, "\t\tRelocation not performed");
+
+	resetColors();
 	
 	return cast(T)result;
 

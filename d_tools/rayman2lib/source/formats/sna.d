@@ -1,6 +1,6 @@
 ﻿module formats.sna;
 
-import std.stdio, std.conv, std.algorithm, core.memory;
+import std.stdio, std.conv, std.algorithm, core.memory, consoled;
 import std.file : read;
 import decoder, utils, global;
 
@@ -23,10 +23,12 @@ class SNAFormat
 
 	this(ubyte[] data)
 	{
-		writeln("Parsing SNA");
+		writecln(Fg.lightMagenta, "Parsing SNA");
 		this.data = decodeData(data);
 		loadedSnas ~= this;
 		parse();
+
+		GC.removeRange(data.ptr);
 	}
 
 	private void parse() {
@@ -51,8 +53,11 @@ class SNAFormat
 				part.size = reader.read!uint;
 
 				part.dataPointer = data.ptr + reader.position;
-				gptPointerRelocation[10 * part.id + memorySomething] = cast(uint)part.dataPointer - somethingRelatedToRelocation;
-				writeln("SNA Relocation ID: 0x", (10 * part.id + memorySomething).to!string(16));
+
+				if(gptPointerRelocation[10 * part.id + memorySomething] == 0)
+					gptPointerRelocation[10 * part.id + memorySomething] = cast(uint)part.dataPointer - somethingRelatedToRelocation;
+
+				writecln(Fg.lightGreen, "SNA Relocation ID: ", Fg.white, "0x", (10 * part.id + memorySomething).to!string(16), Fg.lightGreen, "\t\tPoints at ", Fg.white, "0x", reader.position.to!string(16));
 				//writeln("Part data pointer: 0x", part.dataPointer);
 				//writeln("somethingRelatedToRelocation: 0x", somethingRelatedToRelocation.to!string(16));
 				//writeln([v42, v27, v33].map!"a.to!string(16)");

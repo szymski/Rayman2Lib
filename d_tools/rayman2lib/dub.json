@@ -5,5 +5,8 @@
 	],
 	"description": "Rayman 2 Library.",
 	"copyright": "Copyright 2016, Szymon Jankowski",
-	"license": "MIT"
+	"license": "MIT",
+	"dependencies": {
+		"consoled": "~>1.0.1"	
+	}
 }

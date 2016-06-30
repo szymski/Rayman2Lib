@@ -11,17 +11,24 @@ void readRelocationTableFromBigFile(string filename) {
 	File f = File(filename, "r");
 	initBigFile(f);
 	parseBigFile(f);
+
+	pointerRelocationInfoIndex = 0;
+
+	writeln("Memory of big file");
+	printMemory(relocationKeyValues.ptr, 256, 8);
 }
 
 void readRelocationTableFromRTPFile(string filename) {
 	writeln("Reading relocation table from RTP file");
 	File f = File(filename, "r");
 	parseRTPFile(f);
+
+	pointerRelocationInfoIndex = 0;
 }
 
 void initBigFile(File f) {
-	f.seek(149460992, SEEK_SET);
-	magic = 0x78A94BED;
+	f.seek(67540992, SEEK_SET);
+	magic = 0x207CDEEF;
 
 	f.readEncoded!uint;
 }
