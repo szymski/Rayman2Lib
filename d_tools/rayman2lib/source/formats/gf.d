@@ -139,13 +139,21 @@ class GFFormat {
 		assert(height != 0, "Height isn't set.");
 		assert(pixels.length == width * height, "Invalid pixels size or pixels not provided.");
 
-		transparent = true;
-
-		signature = transparent ? 8888 : 888;
-		channelCount = 4;
-		repeatByte = 1;
+		transparent = false;
 
 		uint channelSize = width * height;
+
+		//Determine if transparent
+		foreach(i; 0 .. channelSize) {
+			if(((pixels[i] >> 24) & 0xFF) < 0xFF) {
+				transparent = true;
+				break;
+			}
+		}
+
+		signature = transparent ? 8888 : 888;
+		channelCount = transparent ? 4 : 3;
+		repeatByte = 1;
 
 		foreach(y; 0 .. height / 2) {
 			foreach(x; 0 .. width) {
@@ -155,28 +163,35 @@ class GFFormat {
 			}
 		}
 
-		ubyte[] blueChannel;
-		ubyte[] greenChannel;
-		ubyte[] redChannel;
-		ubyte[] alphaChannel;
+		ubyte[] tempBlueChannel;
+		ubyte[] tempGreenChannel;
+		ubyte[] tempRedChannel;
+		ubyte[] tempAlphaChannel;
 
-		blueChannel.length = channelSize;
-		greenChannel.length = channelSize;
-		redChannel.length = channelSize;
-		alphaChannel.length = channelSize;
+		tempBlueChannel.length = channelSize;
+		tempGreenChannel.length = channelSize;
+		tempRedChannel.length = channelSize;
+		tempAlphaChannel.length = channelSize;
 
 		foreach(i; 0 .. channelSize) {
-			redChannel[i] = pixels[i] & 0xFF;
-			greenChannel[i] = (pixels[i] >> 8) & 0xFF;
-			blueChannel[i] = (pixels[i] >> 16) & 0xFF;
-			alphaChannel[i] = (pixels[i] >> 24) & 0xFF;
+			tempRedChannel[i] = pixels[i] & 0xFF;
+			tempGreenChannel[i] = (pixels[i] >> 8) & 0xFF;
+			tempBlueChannel[i] = (pixels[i] >> 16) & 0xFF;
+			tempAlphaChannel[i] = (pixels[i] >> 24) & 0xFF;
 
 			// Get rid of all 1s, RLE isn't yet supported
-			if(redChannel[i] == 1) redChannel[i] = 0;
-			if(greenChannel[i] == 1) greenChannel[i] = 0;
-			if(blueChannel[i] == 1) blueChannel[i] = 0;
-			if(alphaChannel[i] == 1) alphaChannel[i] = 0;
+			//if(redChannel[i] == 1) redChannel[i] = 0;
+			//if(greenChannel[i] == 1) greenChannel[i] = 0;
+			//if(blueChannel[i] == 1) blueChannel[i] = 0;
+			//if(alphaChannel[i] == 1) alphaChannel[i] = 0;
 		}
+
+		debug writecln(Fg.lightGreen, "Compressing GF");
+		
+		ubyte[] blueChannel = compressChannel(tempBlueChannel);
+		ubyte[] greenChannel = compressChannel(tempGreenChannel);
+		ubyte[] redChannel = compressChannel(tempRedChannel);
+		ubyte[] alphaChannel = compressChannel(tempAlphaChannel);
 
 		MemoryWriter writer = new MemoryWriter(width * height * 4 + 1024);
 
@@ -189,8 +204,47 @@ class GFFormat {
 		writer.write(blueChannel);
 		writer.write(greenChannel);
 		writer.write(redChannel);
-		writer.write(alphaChannel);
+		if(transparent)
+			writer.write(alphaChannel);
 
 		data = writer.data;
+	}
+
+	private ubyte[] compressChannel(ubyte[] channel) {
+		ubyte[] compressedData;
+
+		uint pixel = 0;
+
+		while(pixel < channel.length) {
+			ubyte color = channel[pixel];
+
+			pixel++;
+
+			if(pixel >= channel.length) {
+				compressedData ~= color == repeatByte ? 0 : color;
+				break;
+			}
+
+			for(ubyte i = 1; i < 255; i++) {
+				if(i == 254 || pixel >= channel.length - 1 || (i > 1 && (channel[pixel] != color))) {
+					compressedData ~= repeatByte;
+					compressedData ~= color;
+					compressedData ~= i;
+					compressedData ~= channel[pixel] == repeatByte ? 0 : channel[pixel];
+					pixel++;
+					break;
+				}
+				if(i == 1 && channel[pixel] != color) {
+					compressedData ~= color == repeatByte ? 0 : color;
+					compressedData ~= channel[pixel] == repeatByte ? 0 : channel[pixel];
+					pixel++;
+					break;
+				}
+
+				pixel++;
+			}
+		}
+
+		return compressedData;
 	}
 }

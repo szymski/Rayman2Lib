@@ -1,6 +1,10 @@
 {
 	"fileVersion": 1,
 	"versions": {
-		"consoled": "1.0.1"
+		"consoled": "1.0.1",
+		"derelict-gl3": "1.0.18",
+		"derelict-util": "2.0.6",
+		"imaged": "1.0.1",
+		"imageformats": "6.0.0"
 	}
 }

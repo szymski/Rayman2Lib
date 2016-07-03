@@ -5,7 +5,7 @@ import consoled, imageformats;
 void main(string[] args)
 {
 	debug {
-		args ~= "unpackcnt";
+		args ~= "packcnt";
 	}
 
 	if(args.length <= 1) {
@@ -153,7 +153,7 @@ void unpackcnt(string[] args) {
 @handler
 void packcnt(string[] args) {
 	debug {
-		args ~= r"Textures.cnt.extracted";
+		args ~= r"TexturesHD.cnt.extracted";
 	}
 	
 	if(args.length == 0) {

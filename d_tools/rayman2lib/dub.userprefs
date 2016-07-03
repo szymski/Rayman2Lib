@@ -1,13 +1,11 @@
 ﻿<Properties StartupItem="dub.json">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Default" PreferredExecutionTarget="debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="dub.json">
+  <MonoDevelop.Ide.Workbench ActiveDocument="source\app.d">
     <Files>
-      <File FileName="source\app.d" Line="67" Column="3" />
-      <File FileName="source\formats\gpt.d" Line="50" Column="37" />
-      <File FileName="source\global.d" Line="1" Column="1" />
-      <File FileName="source\formats\levels0dat.d" Line="1" Column="1" />
-      <File FileName="source\formats\sna.d" Line="1" Column="1" />
-      <File FileName="dub.json" Line="10" Column="24" />
+      <File FileName="source\app.d" Line="156" Column="23" />
+      <File FileName="source\formats\cnt.d" Line="180" Column="5" />
+      <File FileName="source\utils.d" Line="86" Column="18" />
+      <File FileName="source\formats\gf.d" Line="147" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

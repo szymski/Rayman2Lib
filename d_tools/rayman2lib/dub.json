@@ -7,6 +7,7 @@
 	"copyright": "Copyright 2016, Szymon Jankowski",
 	"license": "MIT",
 	"dependencies": {
-		"consoled": "~>1.0.1"	
+		"consoled": "~>1.0.1",
+		"imageformats": "~>6.0.0"	
 	}
 }
