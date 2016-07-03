@@ -1,10 +1,11 @@
-import std.stdio, std.file, std.traits;
-import decoder, formats.gpt, formats.levels0dat, formats.sna, global, utils;
+import std.stdio, std.file, std.path, std.algorithm, std.traits, std.array;
+import decoder, formats.gpt, formats.levels0dat, formats.sna, formats.cnt, formats.gf, global, utils;
+import consoled, imageformats;
 
 void main(string[] args)
 {
 	debug {
-		args ~= "relocation";
+		args ~= "unpackcnt";
 	}
 
 	if(args.length <= 1) {
@@ -13,12 +14,12 @@ void main(string[] args)
 	}
 
 	if(auto handleFunc = args[1] in handlers)
-		(*handleFunc)();
+		(*handleFunc)(args[2 .. $]);
 	else
 		writeln("No such option");
 }
 
-void function()[string] handlers;
+void function(string[])[string] handlers;
 
 static this() {
 	mixin("import thisModule = " ~ __MODULE__ ~ ";");
@@ -31,12 +32,12 @@ static this() {
 struct handler;
 
 @handler
-void test() {
+void test(string[]) {
 	writeln("I'm a test!");
 }
 
 @handler
-void relocation() {
+void relocation(string[]) {
 	writeln("Testing GPT relocation.");
 
 	readRelocationTableFromRTPFile(r"D:\GOG Games\Rayman 2\Data\World\Levels\Fix.rtp");
@@ -58,17 +59,145 @@ void relocation() {
 
 	// List of Learn_30.gpt pointers
 	auto pointerCount = levelGpt.readPointer!uint;
+	auto v23 = levelGpt.readPointer!(ubyte*);
+
+	/*
+	auto pointerCount = levelGpt.readPointer!uint;
 
 	foreach(i; 0 .. pointerCount) {
+		writeln("Reading table");
 		auto v23 = levelGpt.readPointer!(ubyte*);
 
 		auto v24 = levelGpt.readPointer!(ubyte*);
 
+		levelGpt.readPointerBlock(0x58);
 		levelGpt.readPointer!(ubyte*);
+		levelGpt.readPointerBlock(0x4);
 		levelGpt.readPointer!(ubyte*);
 		levelGpt.readPointer!(ubyte*);
 		levelGpt.readPointer!(ubyte*);
 	}
 
+	writeln("Ended reading table");
+
+	auto gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+	gp_stActualWorld = levelGpt.readPointer!(ubyte*);
+*/
+
 	//readRelocationTableFromBigFile(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\LEVELS0.DAT");
+}
+
+@handler
+void unpackcnt(string[] args) {
+	debug {
+		args ~= r"Textures.cnt";
+		args ~= "-png";
+	}
+
+	if(args.length == 0) {
+		writecln(Fg.white, "Usage: unpackcnt filename [outputfolder] [-png]", Fg.initial);
+		return;
+	}
+
+	string cntFilename = args[0];
+	bool toPng = args.canFind("-png");
+
+	CNTFormat cnt = new CNTFormat(cntFilename);
+
+	string outputDir = (args.length == 2 && !args[1].startsWith("-")) ? args[1] ~ "/" : baseName(cntFilename) ~ ".extracted/";
+
+	foreach(file; cnt.fileList) {
+		mkdirRecurse(outputDir ~ file.directory);
+		if(!toPng)
+			std.file.write(outputDir ~ file.directory ~ "/" ~ file.name, file.data);
+		else
+			new GFFormat(file.data).saveToPng(outputDir ~ file.directory ~ "/" ~ file.name ~ ".png");
+	}
+}
+
+@handler
+void packcnt(string[] args) {
+	debug {
+		args ~= r"Textures.cnt.extracted";
+	}
+	
+	if(args.length == 0) {
+		writecln(Fg.white, "Usage: packcnt folder [outputname]", Fg.initial);
+		return;
+	}
+
+	if(!exists(args[0]) || !isDir(args[0])) {
+		writecln(Fg.red, "No such directory", Fg.initial);
+		return;
+	}
+	
+	string outputName = (args.length == 2) ? args[1] : baseName(args[0]).replace(".extracted", "");
+
+	CNTFile[] cntFileList;
+
+	foreach(name; dirEntries(args[0], SpanMode.depth)) {
+		if(!name.isDir && name.extension == ".png") {
+			IFImage image = read_png(name, ColFmt.RGBA);
+
+			GFFormat gf = new GFFormat();
+			gf.width = image.w;
+			gf.height = image.h;
+			gf.pixels = cast(uint[])image.pixels;
+			gf.build();
+
+			CNTFile cntFile = new CNTFile();
+			cntFile.directory = relativePath(dirName(absolutePath(name)), absolutePath(args[0]));
+			cntFile.name = baseName(name).replace(".png", "");
+			cntFile.data = gf.data;
+
+			cntFileList ~= cntFile;
+		}
+	}
+
+	writecln(Fg.white, "Packing into ", outputName);
+
+	CNTFormat cnt = new CNTFormat();
+	cnt.archiveVersion = CNTVersion.rayman2;
+	foreach(cntFile; cntFileList)
+		cnt.fileList ~= cntFile;
+		
+	cnt.build();
+
+	std.file.write(outputName, cnt.data);
+	writecln(Fg.lightMagenta, "Done!", Fg.initial);
 }

@@ -2,6 +2,7 @@
 
 import std.stdio, std.conv, std.algorithm, core.memory, consoled;
 import std.file : read;
+import std.path : baseName;
 import decoder, utils, global;
 
 struct SNAPart {
@@ -13,11 +14,13 @@ struct SNAPart {
 
 class SNAFormat
 {
+	string name = "Unknown";
 	ubyte[] data;
 	SNAPart[] parts;
 
 	this(string filename)
 	{
+		name = baseName(filename);
 		this(cast(ubyte[])read(filename));
 	}
 
@@ -28,7 +31,10 @@ class SNAFormat
 		loadedSnas ~= this;
 		parse();
 
-		GC.removeRange(data.ptr);
+		writecln(Fg.lightMagenta, "SNA Relocation table: ");
+		//foreach(i, v; gptPointerRelocation)
+		//	if(v != 0)
+		//		writecln(Fg.white, "\t0x", i.to!string(16), ": 0x", v.to!string(16));
 	}
 
 	private void parse() {
@@ -44,7 +50,7 @@ class SNAFormat
 			part.id  = reader.read!ubyte;
 			auto memorySomething = reader.read!ubyte;
 			auto v32 = reader.read!ubyte;
-			auto somethingRelatedToRelocation = reader.read!uint;
+			auto somethingRelatedToRelocation = reader.read!int;
 
 			if(somethingRelatedToRelocation != -1) {
 				auto v42 = reader.read!uint;
@@ -54,10 +60,13 @@ class SNAFormat
 
 				part.dataPointer = data.ptr + reader.position;
 
-				if(gptPointerRelocation[10 * part.id + memorySomething] == 0)
+				if(gptPointerRelocation[10 * part.id + memorySomething] == 0) {
+					printMemory(part.dataPointer, 64);
+					writecln(Fg.lightYellow, "Relocation id - ", Fg.white, "0x", (10 * part.id + memorySomething).to!string(16), ": 0x", (cast(uint)part.dataPointer - somethingRelatedToRelocation).to!string(16), Fg.lightYellow, "\t\tSub: ", Fg.white, "0x", somethingRelatedToRelocation.to!string(16));
 					gptPointerRelocation[10 * part.id + memorySomething] = cast(uint)part.dataPointer - somethingRelatedToRelocation;
+				}
 
-				writecln(Fg.lightGreen, "SNA Relocation ID: ", Fg.white, "0x", (10 * part.id + memorySomething).to!string(16), Fg.lightGreen, "\t\tPoints at ", Fg.white, "0x", reader.position.to!string(16));
+				//writecln(Fg.lightGreen, "SNA Relocation ID: ", Fg.white, "0x", (10 * part.id + memorySomething).to!string(16), Fg.lightGreen, "\t\tPoints at ", Fg.white, "0x", reader.position.to!string(16));
 				//writeln("Part data pointer: 0x", part.dataPointer);
 				//writeln("somethingRelatedToRelocation: 0x", somethingRelatedToRelocation.to!string(16));
 				//writeln([v42, v27, v33].map!"a.to!string(16)");

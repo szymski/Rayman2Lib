@@ -11,7 +11,7 @@ class GPTFormat
 	
 	this(string filename)
 	{
-		this(cast(ubyte[])read(filename));
+		this(cast(ubyte[])std.file.read(filename));
 	}
 	
 	this(ubyte[] data)
@@ -27,6 +27,21 @@ class GPTFormat
 
 	T readPointer(T = ubyte*)() {
 		return r.readPointer!T;
+	}
+
+	T[] readPointerBlock(T = ubyte*)(int size) {
+		assert(size % 4 == 0, "Size must be divisible by 4.");
+
+		T[] arr;
+
+		foreach(i; 0 .. size / 4)
+			arr ~= readPointer!T;
+
+		return arr;
+	}
+
+	T read(T)() {
+		return r.read!T;
 	}
 }
 
@@ -48,9 +63,14 @@ T readPointer(T = ubyte*)(MemoryReader r) {
 		//writeln("byte4: ", byte4, "\tbyte5: ", byte5, "\tlocationInOffsetArray: 0x", v1.to!string(16));
 		auto before = result;
 		result += cast(uint)gptPointerRelocation[v1];
+
+		auto snaLocation = pointerToSNALocation(cast(void*)result);
+
 		writec(Fg.lightGreen, "GPT Relocation: ", Fg.lightYellow, "Raw", Fg.white, " = 0x", before.to!string(16), Fg.lightYellow, "\t\tRelocated", Fg.white, " = 0x", cast(void*)result);
 		if(!IsBadReadPtr(cast(void*)result, 1))
 			writec(Fg.lightBlue, "\tValue pointing at ", Fg.white, "0x", (*(cast(ubyte*)result)).to!string(16));
+		if(snaLocation.valid)
+			writec(Fg.cyan, "\t", snaLocation.name, ": ", Fg.white, "0x", snaLocation.address.to!string(16));
 		writeln();
 	}
 	else

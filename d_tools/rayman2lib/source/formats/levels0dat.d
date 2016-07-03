@@ -1,8 +1,8 @@
 ﻿module formats.levels0dat;
 
-import decoder,utils,global;
+import decoder, utils, global, consoled;
 import std.file : read;
-import std.stdio,std.conv;
+import std.stdio, std.conv;
 
 uint magic = 0;
 
