@@ -79,17 +79,4 @@ T readPointer(T = ubyte*)(MemoryReader r) {
 	resetColors();
 	
 	return cast(T)result;
-
-//	ubyte byte4 = relocationKeyValues[pointerRelocationInfoIndex].byte4;
-//	ubyte byte5 = relocationKeyValues[pointerRelocationInfoIndex].byte5;
-//	pointerRelocationInfoIndex++;
-//
-//	auto relativeAddress = r.read!uint;
-//	writeln("Before relocation: 0x", relativeAddress.to!string(16));
-//	writeln("byte4: ", byte4, "\tbyte5: ", byte5, "\tlocationInOffsetArray: 0x", (byte5 * 10 * byte4).to!string(16));
-//
-//	auto result = relativeAddress + gptPointerRelocation[byte5 * 10 * byte4];
-//	writeln("After relocation: 0x", result.to!string(16));
-//
-//	return cast(T)result;
 }

@@ -31,7 +31,7 @@ class SNAFormat
 		loadedSnas ~= this;
 		parse();
 
-		writecln(Fg.lightMagenta, "SNA Relocation table: ");
+		//writecln(Fg.lightMagenta, "SNA Relocation table: ");
 		//foreach(i, v; gptPointerRelocation)
 		//	if(v != 0)
 		//		writecln(Fg.white, "\t0x", i.to!string(16), ": 0x", v.to!string(16));
@@ -59,12 +59,13 @@ class SNAFormat
 				part.size = reader.read!uint;
 
 				part.dataPointer = data.ptr + reader.position;
+				//writecln(Fg.lightGreen, "SNA Part ID: ", Fg.white, part.id, Fg.lightYellow, "\tLocation: ", Fg.white, "0x", reader.position.to!string(16));
 
-				if(gptPointerRelocation[10 * part.id + memorySomething] == 0) {
-					printMemory(part.dataPointer, 64);
-					writecln(Fg.lightYellow, "Relocation id - ", Fg.white, "0x", (10 * part.id + memorySomething).to!string(16), ": 0x", (cast(uint)part.dataPointer - somethingRelatedToRelocation).to!string(16), Fg.lightYellow, "\t\tSub: ", Fg.white, "0x", somethingRelatedToRelocation.to!string(16));
-					gptPointerRelocation[10 * part.id + memorySomething] = cast(uint)part.dataPointer - somethingRelatedToRelocation;
-				}
+				uint relocationValue = cast(uint)part.dataPointer - somethingRelatedToRelocation;
+
+				//printMemory(part.dataPointer, 64);
+				writecln(Fg.lightYellow, "Relocation id - ", Fg.white, "0x", (10 * part.id + memorySomething).to!string(16), ": 0x", relocationValue.to!string(16), Fg.lightYellow, "\t\tSub: ", Fg.white, "0x", somethingRelatedToRelocation.to!string(16));
+				gptPointerRelocation[10 * part.id + memorySomething] = relocationValue;
 
 				//writecln(Fg.lightGreen, "SNA Relocation ID: ", Fg.white, "0x", (10 * part.id + memorySomething).to!string(16), Fg.lightGreen, "\t\tPoints at ", Fg.white, "0x", reader.position.to!string(16));
 				//writeln("Part data pointer: 0x", part.dataPointer);

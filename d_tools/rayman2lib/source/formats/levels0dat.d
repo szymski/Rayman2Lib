@@ -6,16 +6,13 @@ import std.stdio, std.conv;
 
 uint magic = 0;
 
-void readRelocationTableFromBigFile(string filename) {
+void readRelocationTableFromBigFile(string filename, uint position, uint magic) {
 	writeln("Reading relocation table from LEVELS0.DAT");
 	File f = File(filename, "r");
-	initBigFile(f);
+	initBigFile(f, position, magic);
 	parseBigFile(f);
 
 	pointerRelocationInfoIndex = 0;
-
-	writeln("Memory of big file");
-	printMemory(relocationKeyValues.ptr, 256, 8);
 }
 
 void readRelocationTableFromRTPFile(string filename) {
@@ -26,9 +23,9 @@ void readRelocationTableFromRTPFile(string filename) {
 	pointerRelocationInfoIndex = 0;
 }
 
-void initBigFile(File f) {
-	f.seek(67540992, SEEK_SET);
-	magic = 0x207CDEEF;
+void initBigFile(File f, uint position, uint initialMagic) {
+	f.seek(position, SEEK_SET);
+	magic = initialMagic;
 
 	f.readEncoded!uint;
 }

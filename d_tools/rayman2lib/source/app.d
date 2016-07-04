@@ -1,15 +1,20 @@
-import std.stdio, std.file, std.path, std.algorithm, std.traits, std.array;
+import std.stdio, std.file, std.path, std.algorithm, std.traits, std.array, std.conv;
 import decoder, formats.gpt, formats.levels0dat, formats.sna, formats.cnt, formats.gf, global, utils;
 import consoled, imageformats;
 
 void main(string[] args)
 {
 	debug {
-		args ~= "packcnt";
+		args ~= "resizetextures";
 	}
 
 	if(args.length <= 1) {
 		writeln("Usage: ", args[0], " option");
+
+		writeln("Available options:");
+		foreach(key, value; handlers)
+			writeln("\t", key);
+
 		return;
 	}
 
@@ -37,7 +42,7 @@ void test(string[]) {
 }
 
 @handler
-void relocation(string[]) {
+void gpt(string[]) {
 	writeln("Testing GPT relocation.");
 
 	readRelocationTableFromRTPFile(r"D:\GOG Games\Rayman 2\Data\World\Levels\Fix.rtp");
@@ -53,7 +58,7 @@ void relocation(string[]) {
 
 	writeln("\nNow Learn_30 level");
 
-	readRelocationTableFromBigFile(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\LEVELS0.DAT");
+	readRelocationTableFromBigFile(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\LEVELS0.DAT", 67540992, 0x207CDEEF);
 	SNAFormat levelSna = new SNAFormat(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\Learn_30\Learn_30.sna");
 	GPTFormat levelGpt = new GPTFormat(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\Learn_30\Learn_30.gpt");
 
@@ -120,6 +125,24 @@ void relocation(string[]) {
 */
 
 	//readRelocationTableFromBigFile(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\LEVELS0.DAT");
+}
+
+@handler
+void ptx(string[] args) {
+	//readRelocationTableFromRTPFile(r"D:\GOG Games\Rayman 2\Data\World\Levels\Fix.rtp");
+	SNAFormat sna = new SNAFormat(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\Fix.sna");
+	SNAFormat levelSna = new SNAFormat(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\Learn_30\Learn_30.sna");
+	readRelocationTableFromBigFile(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\LEVELS0.DAT", 97017856, 0x41212953);
+	GPTFormat ptx = new GPTFormat(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\Learn_30\Learn_30.ptx");
+
+	printMemory(relocationKeyValues.ptr, 512, 8);
+
+	ptx.read!uint;
+	uint count = ptx.read!uint / 4;
+
+	foreach(i; 0 .. count) {
+		ptx.readPointer();
+	}
 }
 
 @handler
@@ -200,4 +223,13 @@ void packcnt(string[] args) {
 
 	std.file.write(outputName, cnt.data);
 	writecln(Fg.lightMagenta, "Done!", Fg.initial);
+}
+
+/*
+	Handler supposed to resize textures of SNA file.
+*/
+
+@handler
+void resizetextures(string[] args) {
+	
 }
