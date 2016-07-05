@@ -20,7 +20,8 @@ class GFFormat {
 	ubyte channelCount;
 	ubyte repeatByte;
 	bool transparent;
-	
+	uint channelPixels;
+
 	uint[] pixels;
 
 	GFType type;
@@ -53,18 +54,16 @@ class GFFormat {
 		height = reader.read!uint;
 		channelCount = reader.read!ubyte;
 
-
 		// TODO: Fix Rayman 3 texture unpacking
 		if(type == GFType.rayman3) {
 			ubyte enlargeByte = reader.read!ubyte;
 
 			uint w = width, h = height;
 
-			foreach(i; 1 .. enlargeByte) {
+			foreach(i; 0 .. enlargeByte) {
+				channelPixels += w * h;
 				w /= 2;
 				h /= 2;
-				width += w;
-				height += h;
 			}
 		}
 
@@ -73,9 +72,12 @@ class GFFormat {
 		writeln(width, " ", height);
 
 		transparent = channelCount == 4;
-		
+
+		debug writeln("Reading blue channel");
 		ubyte[] blueChannel = readChannel();
+		debug writeln("Reading green channel");
 		ubyte[] greenChannel = readChannel();
+		debug writeln("Reading red channel");
 		ubyte[] redChannel = readChannel();
 		ubyte[] alphaChannel;
 		if(transparent)
@@ -99,16 +101,18 @@ class GFFormat {
 		}
 	}
 	
-	ubyte[] readChannel() {
-		ubyte[] channel;
-		channel.length = width * height;
-
+	private ubyte[] readChannel() {
 		int pixels = width * height;
 		int pixel = 0;
 
+		if(type == GFType.rayman3)
+			pixels = channelPixels;
+
+		ubyte[] channel;
+		channel.length = pixels;
+
 		while (pixel < pixels)
 		{
-			//writeln(pixel, " - ", pixels);
 			ubyte b1 = reader.read!ubyte;
 			if (b1 == repeatByte)
 			{
@@ -201,6 +205,8 @@ class GFFormat {
 		writer.write(width);
 		writer.write(height);
 		writer.write(channelCount);
+		if(type == GFType.rayman3)
+			writer.write!ubyte(1);
 		writer.write(repeatByte);
 
 		writer.write(blueChannel);

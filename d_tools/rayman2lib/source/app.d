@@ -5,7 +5,7 @@ import consoled, imageformats;
 void main(string[] args)
 {
 	debug {
-		args ~= "gftopng";
+		args ~= "unpackcnt";
 	}
 
 	if(args.length <= 1) {
@@ -199,12 +199,17 @@ void unpackcnt(string[] args) {
 	debug {
 		args ~= r"Textures.cnt";
 		args ~= "-png";
+		args ~= "-r2";
 	}
 
 	if(args.length == 0) {
-		writecln(Fg.white, "Usage: unpackcnt filename [outputfolder] [-png]", Fg.initial);
+		writecln(Fg.white, "Usage: unpackcnt filename [outputfolder] [-png] [-r2] [-r3] ", Fg.initial);
 		return;
 	}
+
+	GFType type = GFType.rayman2;
+	if(args.canFind("-r3"))
+		type = GFType.rayman3;
 
 	string cntFilename = args[0];
 	bool toPng = args.canFind("-png");
@@ -218,7 +223,7 @@ void unpackcnt(string[] args) {
 		if(!toPng)
 			std.file.write(outputDir ~ file.directory ~ "/" ~ file.name, file.data);
 		else
-			new GFFormat(file.data).saveToPng(outputDir ~ file.directory ~ "/" ~ file.name ~ ".png"); // TODO: Add parameter for Rayman 3 textures
+			new GFFormat(file.data, type).saveToPng(outputDir ~ file.directory ~ "/" ~ file.name ~ ".png");
 	}
 }
 
@@ -233,7 +238,7 @@ void packcnt(string[] args) {
 	}
 	
 	if(args.length == 0) {
-		writecln(Fg.white, "Usage: packcnt folder [outputname]", Fg.initial);
+		writecln(Fg.white, "Usage: packcnt folder [outputname] [-r2] [-r2vignette] [-r3] [-r3vignette]", Fg.initial);
 		return;
 	}
 
@@ -241,8 +246,20 @@ void packcnt(string[] args) {
 		writecln(Fg.red, "No such directory", Fg.initial);
 		return;
 	}
-	
-	string outputName = (args.length == 2) ? args[1] : baseName(args[0]).replace(".extracted", "");
+
+	CNTVersion type = CNTVersion.rayman2;
+	if(args.canFind("-r2vignette"))
+		type = CNTVersion.rayman2Vignette;
+	if(args.canFind("-r3"))
+		type = CNTVersion.rayman3;
+	if(args.canFind("-r3vignette"))
+		type = CNTVersion.rayman3Vignette;
+
+	GFType gfType = GFType.rayman2;
+	if(type == CNTVersion.rayman3)
+		gfType = GFType.rayman3;
+
+	string outputName = (args.length >= 2 && !args[1].startsWith("-")) ? args[1] : baseName(args[0]).replace(".extracted", "");
 
 	CNTFile[] cntFileList;
 
@@ -250,7 +267,7 @@ void packcnt(string[] args) {
 		if(!name.isDir && name.extension == ".png") { // TODO: Add support for pure GF files
 			IFImage image = read_png(name, ColFmt.RGBA);
 
-			GFFormat gf = new GFFormat();
+			GFFormat gf = new GFFormat(gfType);
 			gf.width = image.w;
 			gf.height = image.h;
 			gf.pixels = cast(uint[])image.pixels;
@@ -268,7 +285,7 @@ void packcnt(string[] args) {
 	writecln(Fg.white, "Packing into ", outputName);
 
 	CNTFormat cnt = new CNTFormat();
-	cnt.archiveVersion = CNTVersion.rayman2; // TODO: Add archive type selection
+	cnt.archiveVersion = CNTVersion.rayman3;
 	foreach(cntFile; cntFileList)
 		cnt.fileList ~= cntFile;
 		
@@ -285,12 +302,12 @@ void packcnt(string[] args) {
 @handler
 void gftopng(string[] args) {
 	debug {
-		args ~= r"ios_textures";
-		args ~= r"-ios";
+		args ~= r"r2demo_vignette";
+		args ~= r"-r2";
 	}
 	
 	if(args.length == 0) {
-		writecln(Fg.white, "Usage: gftopng folder [outputfolder] [-ios]", Fg.initial);
+		writecln(Fg.white, "Usage: gftopng folder [outputfolder] [-r2] [-r2ios] [-r3]", Fg.initial);
 		return;
 	}
 	
@@ -300,17 +317,19 @@ void gftopng(string[] args) {
 	}
 
 	GFType type = GFType.rayman2;
-	if(args.canFind("-ios"))
+	if(args.canFind("-r2ios"))
 		type = GFType.rayman2ios;
+	if(args.canFind("-r3"))
+		type = GFType.rayman3;
 
 	string outputDir = (args.length >= 2 && !args[1].startsWith("-")) ? args[1] : args[0] ~ ".png";
 
 	mkdirRecurse(outputDir);
 
 	foreach(name; dirEntries(args[0], SpanMode.depth)) {
-		if(!name.isDir) {
+		if(!name.isDir && name.extension.toLower == ".gf") {
 			mkdirRecurse(outputDir ~ "/" ~ dirName(relativePath(absolutePath(name), absolutePath(args[0]))));
-			new GFFormat(name, type).saveToPng(outputDir ~ "/" ~ relativePath(absolutePath(name), absolutePath(args[0])) ~ ".png"); // TODO: Add parameter for Rayman 3 textures
+			new GFFormat(name, type).saveToPng(outputDir ~ "/" ~ relativePath(absolutePath(name), absolutePath(args[0])) ~ ".png");
 		}
 	}
 }
