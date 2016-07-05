@@ -4,7 +4,7 @@ import decoder, utils, global, consoled;
 import std.file : read;
 import std.stdio, std.conv;
 
-uint magic = 0;
+private uint magic = 0;
 
 void readRelocationTableFromBigFile(string filename, uint position, uint magic) {
 	writeln("Reading relocation table from LEVELS0.DAT");
@@ -23,14 +23,14 @@ void readRelocationTableFromRTPFile(string filename) {
 	pointerRelocationInfoIndex = 0;
 }
 
-void initBigFile(File f, uint position, uint initialMagic) {
+private void initBigFile(File f, uint position, uint initialMagic) {
 	f.seek(position, SEEK_SET);
 	magic = initialMagic;
 
 	f.readEncoded!uint;
 }
 
-void parseBigFile(File f) {
+private void parseBigFile(File f) {
 	ubyte count = f.readEncoded!ubyte;
 	
 	f.readEncoded!uint;
@@ -55,7 +55,7 @@ void parseBigFile(File f) {
 	}
 }
 
-T readEncoded(T)(File f) {
+private T readEncoded(T)(File f) {
 	ubyte[T.sizeof] bytes;
 
 	foreach(i; 0 .. T.sizeof) {
@@ -66,7 +66,7 @@ T readEncoded(T)(File f) {
 	return *(cast(T*)bytes.ptr);
 }
 
-void parseRTPFile(File f) {
+private void parseRTPFile(File f) {
 	ubyte count = f.readType!ubyte;
 	
 	f.readType!uint;

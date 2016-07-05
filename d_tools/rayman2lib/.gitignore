@@ -4,3 +4,7 @@ __dummy.html
 *.o
 *.obj
 *.png
+*.cnt
+*.extracted
+*.lst
+*.gf

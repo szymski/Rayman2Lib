@@ -131,5 +131,5 @@ T readType(T)(File f) {
 
 void printStruct(T)(T obj) {
 	foreach(member; __traits(allMembers, T))
-		mixin("writeln(\"" ~ member ~ "\", \":\", obj." ~ member ~ ");");
+		mixin("writeln(\"" ~ member ~ "\", \": \", obj." ~ member ~ ");");
 }

@@ -45,7 +45,7 @@ class GPTFormat
 	}
 }
 
-T readPointer(T = ubyte*)(MemoryReader r) {
+private T readPointer(T = ubyte*)(MemoryReader r) {
 	uint dword0 = relocationKeyValues[pointerRelocationInfoIndex].dword0;
 	ubyte byte4 = relocationKeyValues[pointerRelocationInfoIndex].byte4, byte5 = relocationKeyValues[pointerRelocationInfoIndex].byte5;
 	

@@ -6,7 +6,7 @@ import std.path : baseName;
 import utils, global;
 import imageformats;
 
-enum GFType { rayman2, rayman3 };
+enum GFType { rayman2, rayman2ios, rayman3 };
 
 class GFFormat {
 
@@ -32,27 +32,29 @@ class GFFormat {
 
 	this(string filename, GFType type = GFType.rayman2)
 	{
-		this.type = type;
 		name = baseName(filename);
-		this(cast(ubyte[])read(filename));
+		this(cast(ubyte[])read(filename), type);
 	}
 	
 	this(ubyte[] data, GFType type = GFType.rayman2)
 	{
 		this.type = type;
-		writecln(Fg.lightMagenta, "Reading GF");
+		writecln(Fg.lightMagenta, "Reading ", type, " GF");
 		this.data = data;
 		parse();
 	}
 	
 	void parse() {
 		reader = new MemoryReader(data);
-		
-		signature = reader.read!uint;
+
+		if(type != GFType.rayman2ios) 
+			signature = reader.read!uint;
 		width = reader.read!uint;
 		height = reader.read!uint;
 		channelCount = reader.read!ubyte;
 
+
+		// TODO: Fix Rayman 3 texture unpacking
 		if(type == GFType.rayman3) {
 			ubyte enlargeByte = reader.read!ubyte;
 

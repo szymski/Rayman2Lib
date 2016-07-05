@@ -63,9 +63,11 @@ class SNAFormat
 
 				uint relocationValue = cast(uint)part.dataPointer - somethingRelatedToRelocation;
 
-				//printMemory(part.dataPointer, 64);
-				writecln(Fg.lightYellow, "Relocation id - ", Fg.white, "0x", (10 * part.id + memorySomething).to!string(16), ": 0x", relocationValue.to!string(16), Fg.lightYellow, "\t\tSub: ", Fg.white, "0x", somethingRelatedToRelocation.to!string(16));
-				gptPointerRelocation[10 * part.id + memorySomething] = relocationValue;
+				// TODO: Make sure this works well
+				if(part.size != 0) {
+					writecln(Fg.lightYellow, "Relocation id - ", Fg.white, "0x", (10 * part.id + memorySomething).to!string(16), ": 0x", relocationValue.to!string(16), Fg.lightYellow, "\t\tSub: ", Fg.white, "0x", somethingRelatedToRelocation.to!string(16));
+					gptPointerRelocation[10 * part.id + memorySomething] = relocationValue;
+				}
 
 				//writecln(Fg.lightGreen, "SNA Relocation ID: ", Fg.white, "0x", (10 * part.id + memorySomething).to!string(16), Fg.lightGreen, "\t\tPoints at ", Fg.white, "0x", reader.position.to!string(16));
 				//writeln("Part data pointer: 0x", part.dataPointer);
