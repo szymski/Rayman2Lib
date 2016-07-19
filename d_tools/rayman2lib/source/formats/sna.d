@@ -94,117 +94,38 @@ class SNAFormat
 		writecln(Fg.lightMagenta, "Relocating SNA pointers");
 		readRelocationTableFromFile(filename);
 
-		MemoryWriter writer = new MemoryWriter(data);
-
 		foreach(part; parts) {
-			if(part.size == 0)
+			if(part.size <= 0)
 				continue;
 
-			PointerRelocationHeader currentHeader;
+			PointerRelocationHeader header;
 
-			pointerRelocationInfoIndex = 0;
-
-			foreach(header; relocationHeaders) {
-				if(header.partId == part.id && header.block == part.block) {
-					currentHeader = header;
-					pointerRelocationInfoIndex = header.index;
-					//writeln("found");
-					//writeln(relocationKeyValues[pointerRelocationInfoIndex].dword0.to!string(16));
+			foreach(relocHeader; relocationHeaders) {
+				if(relocHeader.partId == part.id && relocHeader.block == part.block) {
+					header = relocHeader;
 					break;
 				}
 			}
 
-			uint lastPosition = part.dataPosition;
+			foreach(i; header.index .. header.index + header.size) {
+				PointerRelocationInfo relocValue = relocationKeyValues[i];
 
-			foreach(i; 0 .. currentHeader.size) {
-				reader.position = lastPosition;
-				writer.position = lastPosition;
+				uint* rawAddress = cast(uint*)(relocValue.dword0 + gptPointerRelocation[10 * part.id + part.block]);
+				uint before = cast(uint)*rawAddress;
+				*rawAddress += gptPointerRelocation[10 * relocValue.byte4 + relocValue.byte5];
+			
+				// TODO: Debug info, remove later
+				import core.sys.windows.windows;
 
-				auto value = relocationKeyValues[pointerRelocationInfoIndex];
-
-				bool done;
-
-				foreach(j; (lastPosition - part.dataPosition) .. part.size / 4 - (part.size % 4)) {
-					auto ptr = reader.read!uint;
-
-					if(value.dword0 == ptr) {
-						auto before = ptr;
-											ptr += gptPointerRelocation[value.byte5 + 10 * value.byte4];
-						
-											auto snaLocation = pointerToSNALocation(cast(void*)ptr);
-						
-											import core.sys.windows.windows;
-						
-											writec(Fg.lightGreen, "SNA Relocation: ", Fg.lightYellow, "Raw", Fg.white, " = 0x", before.to!string(16), Fg.lightYellow, "\t\tRelocated", Fg.white, " = 0x", cast(void*)ptr);
-											if(!IsBadReadPtr(cast(void*)ptr, 1))
-												writec(Fg.lightBlue, "\tValue pointing at ", Fg.white, "0x", (*(cast(ubyte*)ptr)).to!string(16));
-											if(snaLocation.valid)
-												writec(Fg.cyan, "\t", snaLocation.name, ": ", Fg.white, "0x", snaLocation.address.to!string(16));
-											writeln();
-
-						done = true;
-						lastPosition = reader.position;
-
-						break;
-					}
-				}
-
-				if(!done) {
-					reader.position = part.dataPosition;
-					writer.position = part.dataPosition;
-
-					foreach(j; 0 .. part.size / 4 - (part.size % 4)) {
-						auto ptr = reader.read!uint;
-						
-						if(value.dword0 == ptr) {
-							auto before = ptr;
-							ptr += gptPointerRelocation[value.byte5 + 10 * value.byte4];
-							
-							auto snaLocation = pointerToSNALocation(cast(void*)ptr);
-							
-							import core.sys.windows.windows;
-							
-							writec(Fg.lightGreen, "SNA Relocation: ", Fg.lightYellow, "Raw", Fg.white, " = 0x", before.to!string(16), Fg.lightYellow, "\t\tRelocated", Fg.white, " = 0x", cast(void*)ptr);
-							if(!IsBadReadPtr(cast(void*)ptr, 1))
-								writec(Fg.lightBlue, "\tValue pointing at ", Fg.white, "0x", (*(cast(ubyte*)ptr)).to!string(16));
-							if(snaLocation.valid)
-								writec(Fg.cyan, "\t", snaLocation.name, ": ", Fg.white, "0x", snaLocation.address.to!string(16));
-							writeln();
-							
-							done = true;
-							lastPosition = reader.position;
-							
-							break;
-						}
-					}
-				}
-
-				pointerRelocationInfoIndex++;
+				auto snaLocation = pointerToSNALocation(cast(void*)*rawAddress);
+				
+				writec(Fg.lightGreen, "SNA Relocation: ", Fg.lightYellow, "Raw", Fg.white, " = 0x", before.to!string(16), Fg.lightYellow, "\t\tRelocated", Fg.white, " = 0x", cast(void*)*rawAddress);
+				if(!IsBadReadPtr(cast(void*)*rawAddress, 1))
+					writec(Fg.lightBlue, "\tValue pointing at ", Fg.white, "0x", (*(cast(ubyte*)*rawAddress)).to!string(16));
+				if(snaLocation.valid)
+					writec(Fg.cyan, "\t", snaLocation.name, ": ", Fg.white, "0x", snaLocation.address.to!string(16));
+				writeln();
 			}
-
-//			foreach(i; 0 .. part.size - (part.size % 4)) {
-//				auto ptr = reader.read!uint;
-//
-//				auto value = relocationKeyValues[pointerRelocationInfoIndex];
-//
-//				if(value.dword0 == ptr) {
-//					pointerRelocationInfoIndex++;
-//
-//					auto before = ptr;
-//					ptr += gptPointerRelocation[value.byte5 + 10 * value.byte4];
-//
-//					auto snaLocation = pointerToSNALocation(cast(void*)ptr);
-//
-//					import core.sys.windows.windows;
-//
-//					writec(Fg.lightGreen, "SNA Relocation: ", Fg.lightYellow, "Raw", Fg.white, " = 0x", before.to!string(16), Fg.lightYellow, "\t\tRelocated", Fg.white, " = 0x", cast(void*)ptr);
-//					if(!IsBadReadPtr(cast(void*)ptr, 1))
-//						writec(Fg.lightBlue, "\tValue pointing at ", Fg.white, "0x", (*(cast(ubyte*)ptr)).to!string(16));
-//					if(snaLocation.valid)
-//						writec(Fg.cyan, "\t", snaLocation.name, ": ", Fg.white, "0x", snaLocation.address.to!string(16));
-//					writeln();
-//				}
-//			}
 		}
 	}
 
