@@ -45,7 +45,7 @@ class GPTFormat
 	}
 }
 
-private T readPointer(T = ubyte*)(MemoryReader r) {
+T readPointer(T = ubyte*)(MemoryReader r) {
 	uint dword0 = relocationKeyValues[pointerRelocationInfoIndex].dword0;
 	ubyte byte4 = relocationKeyValues[pointerRelocationInfoIndex].byte4, byte5 = relocationKeyValues[pointerRelocationInfoIndex].byte5;
 	
@@ -73,8 +73,9 @@ private T readPointer(T = ubyte*)(MemoryReader r) {
 			writec(Fg.cyan, "\t", snaLocation.name, ": ", Fg.white, "0x", snaLocation.address.to!string(16));
 		writeln();
 	}
-	else
+	else {
 		writecln(Fg.lightGreen, "GPT Relocation: ", Fg.lightYellow, "Raw", Fg.white, " = 0x", result.to!string(16), Fg.red, "\t\tRelocation not performed");
+	}
 
 	resetColors();
 	

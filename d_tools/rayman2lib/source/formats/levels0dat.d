@@ -15,10 +15,10 @@ void readRelocationTableFromBigFile(string filename, uint position, uint magic) 
 	pointerRelocationInfoIndex = 0;
 }
 
-void readRelocationTableFromRTPFile(string filename) {
-	writeln("Reading relocation table from RTP file");
+void readRelocationTableFromFile(string filename) {
+	writeln("Reading relocation table from file");
 	File f = File(filename, "r");
-	parseRTPFile(f);
+	parseFile(f);
 
 	pointerRelocationInfoIndex = 0;
 }
@@ -36,12 +36,16 @@ private void parseBigFile(File f) {
 	f.readEncoded!uint;
 	
 	int lRelocationKeyValuesIndex = 0;
+
+	relocationHeaders.length = 0;
 	
 	foreach(i; 0 .. count) {
 		ubyte moduleId = f.readEncoded!ubyte;
 		ubyte blockId = f.readEncoded!ubyte;
 		uint size = f.readEncoded!uint;
-		
+
+		relocationHeaders ~= PointerRelocationHeader(moduleId, blockId, lRelocationKeyValuesIndex, size);
+
 		foreach(j; 0 .. size) {
 			auto value = f.readEncoded!PointerRelocationInfo;
 
@@ -66,17 +70,21 @@ private T readEncoded(T)(File f) {
 	return *(cast(T*)bytes.ptr);
 }
 
-private void parseRTPFile(File f) {
+private void parseFile(File f) {
 	ubyte count = f.readType!ubyte;
 	
 	f.readType!uint;
 	
 	int lRelocationKeyValuesIndex = 0;
+
+	relocationHeaders.length = 0;
 	
 	foreach(i; 0 .. count) {
 		ubyte moduleId = f.readType!ubyte;
 		ubyte blockId = f.readType!ubyte;
 		uint size = f.readType!uint;
+
+		relocationHeaders ~= PointerRelocationHeader(moduleId, blockId, lRelocationKeyValuesIndex, size);
 		
 		foreach(j; 0 .. size) {
 			auto value = f.readType!PointerRelocationInfo;
