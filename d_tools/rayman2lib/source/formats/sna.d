@@ -91,46 +91,67 @@ class SNAFormat
 	}
 
 	void relocatePointersUsingFile(string filename) {
-		writecln(Fg.lightMagenta, "Relocating SNA pointers");
+		writecln(Fg.lightMagenta, "Relocating SNA pointers using RTB");
 		readRelocationTableFromFile(filename);
 
+		relocate();
+	}
+
+	void relocatePointersUsingBigFile(string filename, uint offset, uint magic) {
+		writecln(Fg.lightMagenta, "Relocating SNA pointers using big file");
+		readRelocationTableFromBigFile(filename, offset, magic);
+
+		relocate();
+	}
+
+	private void relocate() {
+		// TODO: Debug file, remove later
+		import std.stdio;
+		auto file = File(name ~ ".csv", "w");
+		file.writeln("sep=;\nRaw address location;Raw address;File;After relocation");
+		
 		foreach(part; parts) {
 			if(part.size <= 0)
 				continue;
-
+			
 			PointerRelocationHeader header;
-
+			
 			foreach(relocHeader; relocationHeaders) {
 				if(relocHeader.partId == part.id && relocHeader.block == part.block) {
 					header = relocHeader;
 					break;
 				}
 			}
-
+			
 			foreach(i; header.index .. header.index + header.size) {
 				PointerRelocationInfo relocValue = relocationKeyValues[i];
-
+				
 				uint* rawAddress = cast(uint*)(relocValue.dword0 + gptPointerRelocation[10 * part.id + part.block]);
 				uint before = cast(uint)*rawAddress;
 				*rawAddress += gptPointerRelocation[10 * relocValue.byte4 + relocValue.byte5];
-			
+				
 				// TODO: Debug info, remove later
 				import core.sys.windows.windows;
-
+				
 				auto snaLocation = pointerToSNALocation(cast(void*)*rawAddress);
 				
-				writec(Fg.lightGreen, "SNA Relocation: ", Fg.lightYellow, "Raw", Fg.white, " = 0x", before.to!string(16), Fg.lightYellow, "\t\tRelocated", Fg.white, " = 0x", cast(void*)*rawAddress);
-				if(!IsBadReadPtr(cast(void*)*rawAddress, 1))
-					writec(Fg.lightBlue, "\tValue pointing at ", Fg.white, "0x", (*(cast(ubyte*)*rawAddress)).to!string(16));
-				if(snaLocation.valid)
-					writec(Fg.cyan, "\t", snaLocation.name, ": ", Fg.white, "0x", snaLocation.address.to!string(16));
-				writeln();
+				file.write("0x", (cast(uint)rawAddress - cast(uint)data.ptr).to!string(16), ";");
+				file.write("0x", before.to!string(16), ";");
+				if(snaLocation.valid) {
+					file.write(snaLocation.name, ";0x", snaLocation.address.to!string(16));
+				}
+				file.writeln();
+				
+				//				writec(Fg.lightGreen, "SNA Relocation: ", Fg.lightYellow, "Raw", Fg.white, " = 0x", before.to!string(16), Fg.lightYellow, "\t\tRelocated", Fg.white, " = 0x", cast(void*)*rawAddress);
+				//				if(!IsBadReadPtr(cast(void*)*rawAddress, 1))
+				//					writec(Fg.lightBlue, "\tValue pointing at ", Fg.white, "0x", (*(cast(ubyte*)*rawAddress)).to!string(16));
+				//				if(snaLocation.valid)
+				//					writec(Fg.cyan, "\t", snaLocation.name, ": ", Fg.white, "0x", snaLocation.address.to!string(16));
+				//				writeln();
 			}
 		}
-	}
-
-	void relocatePointersUsingBigFile() {
 		
+		file.close();
 	}
 
 	void printInfo() {
@@ -138,4 +159,4 @@ class SNAFormat
 			writeln("Part id: ", part.id, "\n\tSize: ", part.size);
 		}
 	}
-}
+} 

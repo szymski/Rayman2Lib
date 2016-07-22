@@ -1,8 +1,19 @@
 ﻿module global;
 
-import formats.sna;
+import std.stdio, std.conv;
+import formats.sna, consoled;
+
+/*
+	SNA related stuff
+*/
 
 SNAFormat[] loadedSnas;
+
+/*
+	Relocation related stuff
+*/
+
+bool relocationLogging = true;
 
 struct PointerRelocationHeader { ubyte partId, block; uint index; uint size; }
 struct PointerRelocationInfo { uint dword0; ubyte byte4, byte5, byte6, byte7; }
@@ -34,4 +45,16 @@ auto pointerToSNALocation(T)(T* pointer) {
 	}
 
 	return toReturn;
+}
+
+/**
+	Print address information
+*/
+auto printAddressInformation(void* address) {
+	auto snaLocation = pointerToSNALocation(address);
+
+	if(snaLocation.valid)
+		writecln(Fg.cyan, "\t", snaLocation.name, ": ", Fg.white, "0x", snaLocation.address.to!string(16));
+	else
+		writecln("Not a valid SNA address");
 }

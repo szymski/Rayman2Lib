@@ -22,6 +22,7 @@ class GPTFormat
 	}
 	
 	private void parse() {
+		pointerRelocationInfoIndex = 0;
 		r = new MemoryReader(data);
 	}
 
@@ -66,15 +67,18 @@ T readPointer(T = ubyte*)(MemoryReader r) {
 
 		auto snaLocation = pointerToSNALocation(cast(void*)result);
 
-		writec(Fg.lightGreen, "GPT Relocation: ", Fg.lightYellow, "Raw", Fg.white, " = 0x", before.to!string(16), Fg.lightYellow, "\t\tRelocated", Fg.white, " = 0x", cast(void*)result);
-		if(!IsBadReadPtr(cast(void*)result, 1))
-			writec(Fg.lightBlue, "\tValue pointing at ", Fg.white, "0x", (*(cast(ubyte*)result)).to!string(16));
-		if(snaLocation.valid)
-			writec(Fg.cyan, "\t", snaLocation.name, ": ", Fg.white, "0x", snaLocation.address.to!string(16));
-		writeln();
+		if(relocationLogging) {
+			writec(Fg.lightGreen, "GPT Relocation: ", Fg.lightYellow, "Raw", Fg.white, " = 0x", before.to!string(16), Fg.lightYellow, "\t\tRelocated", Fg.white, " = 0x", cast(void*)result);
+			if(!IsBadReadPtr(cast(void*)result, 1))
+				writec(Fg.lightBlue, "\tValue pointing at ", Fg.white, "0x", (*(cast(ubyte*)result)).to!string(16));
+			if(snaLocation.valid)
+				writec(Fg.cyan, "\t", snaLocation.name, ": ", Fg.white, "0x", snaLocation.address.to!string(16));
+			writeln();
+		}
 	}
 	else {
-		writecln(Fg.lightGreen, "GPT Relocation: ", Fg.lightYellow, "Raw", Fg.white, " = 0x", result.to!string(16), Fg.red, "\t\tRelocation not performed");
+		if(relocationLogging)
+			writecln(Fg.lightGreen, "GPT Relocation: ", Fg.lightYellow, "Raw", Fg.white, " = 0x", result.to!string(16), Fg.red, "\t\tRelocation not performed");
 	}
 
 	resetColors();
