@@ -25,7 +25,7 @@ class MemoryReader {
 		}
 	}
 
-	bool isEof() {
+	bool eof() {
 		return position >= data.length;
 	}
 }

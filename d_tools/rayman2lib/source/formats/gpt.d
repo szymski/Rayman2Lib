@@ -30,6 +30,10 @@ class GPTFormat
 		return r.readPointer!T;
 	}
 
+	auto readPointerEx(T = ubyte*)() {
+		return r.readPointerEx!T;
+	}
+
 	T[] readPointerBlock(T = ubyte*)(int size) {
 		assert(size % 4 == 0, "Size must be divisible by 4.");
 
@@ -41,8 +45,23 @@ class GPTFormat
 		return arr;
 	}
 
+	T[] readBlock(T = uint)(int size) {
+		assert(size % 4 == 0, "Size must be divisible by 4.");
+		
+		T[] arr;
+		
+		foreach(i; 0 .. size / 4)
+			arr ~= read!T;
+		
+		return arr;
+	}
+
 	T read(T)() {
 		return r.read!T;
+	}
+
+	bool eof() {
+		return r.eof;
 	}
 }
 
@@ -84,4 +103,63 @@ T readPointer(T = ubyte*)(MemoryReader r) {
 	resetColors();
 	
 	return cast(T)result;
+}
+
+auto readPointerEx(T = ubyte*)(MemoryReader r) {
+	struct return_t {
+		uint rawValue;
+		T value;
+		string snaFile;
+		uint snaAddress;
+	}
+
+	return_t returnResult;
+
+	uint dword0 = relocationKeyValues[pointerRelocationInfoIndex].dword0;
+	ubyte byte4 = relocationKeyValues[pointerRelocationInfoIndex].byte4, byte5 = relocationKeyValues[pointerRelocationInfoIndex].byte5;
+	
+	auto relativeAddress = r.read!uint;
+	uint result = relativeAddress;
+
+	returnResult.rawValue = relativeAddress;
+
+	relativeAddress &= ~0xFF;
+	relativeAddress |= byte5;
+	
+	uint v1 = relativeAddress + 10 * byte4;
+	v1 &= 0xFF;
+	
+	if(result == dword0) {
+		pointerRelocationInfoIndex++;
+
+		auto before = result;
+
+		//writeln("byte4: ", byte4, "\tbyte5: ", byte5, "\tlocationInOffsetArray: 0x", v1.to!string(16));
+		result += cast(uint)gptPointerRelocation[v1];
+		returnResult.value = cast(T)result;
+
+		auto snaLocation = pointerToSNALocation(cast(void*)result);
+		
+		if(relocationLogging) {
+			writec(Fg.lightGreen, "GPT Relocation: ", Fg.lightYellow, "Raw", Fg.white, " = 0x", before.to!string(16), Fg.lightYellow, "\t\tRelocated", Fg.white, " = 0x", cast(void*)result);
+			if(!IsBadReadPtr(cast(void*)result, 1))
+				writec(Fg.lightBlue, "\tValue pointing at ", Fg.white, "0x", (*(cast(ubyte*)result)).to!string(16));
+			if(snaLocation.valid)
+				writec(Fg.cyan, "\t", snaLocation.name, ": ", Fg.white, "0x", snaLocation.address.to!string(16));
+			writeln();
+		}
+
+		if(snaLocation.valid) {
+			returnResult.snaFile = snaLocation.name;
+			returnResult.snaAddress = snaLocation.address;
+		}
+	}
+	else {
+		if(relocationLogging)
+			writecln(Fg.lightGreen, "GPT Relocation: ", Fg.lightYellow, "Raw", Fg.white, " = 0x", result.to!string(16), Fg.red, "\t\tRelocation not performed");
+	}
+	
+	resetColors();
+	
+	return returnResult;
 }

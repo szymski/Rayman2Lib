@@ -87,7 +87,7 @@ class SNAFormat
 				writeln("Empty SNA block");
 			}
 		}
-		while(!reader.isEof);
+		while(!reader.eof);
 	}
 
 	void relocatePointersUsingFile(string filename) {
@@ -107,7 +107,7 @@ class SNAFormat
 	private void relocate() {
 		// TODO: Debug file, remove later
 		import std.stdio;
-		auto file = File(name ~ ".csv", "w");
+		auto file = File("dump_" ~ name ~ ".csv", "w");
 		file.writeln("sep=;\nRaw address location;Raw address;File;After relocation");
 		
 		foreach(part; parts) {

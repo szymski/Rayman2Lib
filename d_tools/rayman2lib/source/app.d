@@ -5,7 +5,7 @@ import consoled, imageformats;
 void main(string[] args)
 {
 	debug {
-		args ~= "gpt";
+		args ~= "dumpgpt";
 	}
 
 	if(args.length <= 1) {
@@ -106,7 +106,7 @@ void readLearn_30Gpt(SNAFormat fix) {
 //	foreach(i; 0 .. pointerCount) {
 //		writeln("Reading table");
 //		auto v23 = levelGpt.readPointer!(uint**);
-//		printMemory(&v23[1][3], 512);
+//		//printMemory(&v23[1][3], 512);
 //		
 //		if(cast(uint)v23 != 0 && v23[1][3]) {
 //			auto v24 = levelGpt.readPointer!(ubyte*);
@@ -119,16 +119,18 @@ void readLearn_30Gpt(SNAFormat fix) {
 //			levelGpt.readPointer!(ubyte*);
 //		}
 //		writeln("End reading table");
-//
 //	}
 
 	assert(levelGpt.r.position == 604, "Invalid exit position. Table reading inproper.");
 	
 	writeln("Ended reading table");
+
+	relocationLogging = true; // TODO: Just for testing models, remove later
 	
 	auto gp_stActualWorld = levelGpt.readPointer!(ubyte*);
 	auto gp_stDynamicWorld = levelGpt.readPointer!(ubyte*);
 	auto dword_500FC4 = levelGpt.readPointer!(ubyte*);
+	writeln("SECT_hFatherSector");
 	auto SECT_hFatherSector = levelGpt.readPointer!(ubyte*);
 	auto gs_hFirstSubMapPosition = levelGpt.readPointer!(ubyte*);
 	auto g_stAlways = levelGpt.readPointerBlock(0x1C);
@@ -155,21 +157,21 @@ void readLearn_30Gpt(SNAFormat fix) {
 	}
 
 	levelGpt.readPointer!(ubyte*);
-	auto tdstStacks = levelGpt.readPointerBlock!uint(12 * 16);
+	auto tdstStacks = levelGpt.readBlock!uint(12 * 16);
 
 	relocationLogging = false; // A lot of data is read here, we don't need to log it
-	auto p_stA3dGENERAL = levelGpt.readPointerBlock!uint((tdstStacks[1] - tdstStacks[3]) * 56);
-	auto p_a3_xVectors = levelGpt.readPointerBlock!uint((tdstStacks[5] - tdstStacks[7]) * 12);
-	auto p_a4_xQuaternions = levelGpt.readPointerBlock!uint((tdstStacks[9] - tdstStacks[11]) * 8);
-	auto p_stHierarchies = levelGpt.readPointerBlock!uint((tdstStacks[13] - tdstStacks[15]) * 4);
-	auto p_stNTT0 = levelGpt.readPointerBlock!uint((tdstStacks[17] - tdstStacks[19]) * 6);
-	auto p_stOnlyFrames = levelGpt.readPointerBlock!uint((tdstStacks[21] - tdstStacks[23]) * 10);
-	auto p_stChannels = levelGpt.readPointerBlock!uint((tdstStacks[25] - tdstStacks[27]) * 16);
-	auto p_stFrames = levelGpt.readPointerBlock!uint((tdstStacks[29] - tdstStacks[31]) * 2);
-	auto p_stFramesKF = levelGpt.readPointerBlock!uint((tdstStacks[33] - tdstStacks[35]) * 4);
-	auto p_stKeyFrames = levelGpt.readPointerBlock!uint((tdstStacks[37] - tdstStacks[39]) * 36);
-	auto p_stEvents = levelGpt.readPointerBlock!uint((tdstStacks[41] - tdstStacks[43]) * 0xC);
-	auto p_stMorphData = levelGpt.readPointerBlock!uint((tdstStacks[45] - tdstStacks[47]) * 8);
+	auto p_stA3dGENERAL = levelGpt.readBlock!uint((tdstStacks[1] - tdstStacks[3]) * 56);
+	auto p_a3_xVectors = levelGpt.readBlock!uint((tdstStacks[5] - tdstStacks[7]) * 12);
+	auto p_a4_xQuaternions = levelGpt.readBlock!uint((tdstStacks[9] - tdstStacks[11]) * 8);
+	auto p_stHierarchies = levelGpt.readBlock!uint((tdstStacks[13] - tdstStacks[15]) * 4);
+	auto p_stNTT0 = levelGpt.readBlock!uint((tdstStacks[17] - tdstStacks[19]) * 6);
+	auto p_stOnlyFrames = levelGpt.readBlock!uint((tdstStacks[21] - tdstStacks[23]) * 10);
+	auto p_stChannels = levelGpt.readBlock!uint((tdstStacks[25] - tdstStacks[27]) * 16);
+	auto p_stFrames = levelGpt.readBlock!uint((tdstStacks[29] - tdstStacks[31]) * 2);
+	auto p_stFramesKF = levelGpt.readBlock!uint((tdstStacks[33] - tdstStacks[35]) * 4);
+	auto p_stKeyFrames = levelGpt.readBlock!uint((tdstStacks[37] - tdstStacks[39]) * 36);
+	auto p_stEvents = levelGpt.readBlock!uint((tdstStacks[41] - tdstStacks[43]) * 0xC);
+	auto p_stMorphData = levelGpt.readBlock!uint((tdstStacks[45] - tdstStacks[47]) * 8);
 	relocationLogging = true;
 
 	auto g_AlphabetCharacterPointer = levelGpt.readPointer!(ubyte*);
@@ -186,14 +188,22 @@ void readLearn_30Gpt(SNAFormat fix) {
 	//printAddressInformation(GLI_g_hMenuBackgroundObject.unknownPointer2);
 	//printAddressInformation(GLI_g_hMenuBackgroundObject.unknownPointer3);
 
-	testModel(fix.data.ptr + 0x62015F);
-	//testModel(levelSna.data.ptr + 0x59E6C);
+//	exportModel(fix.data.ptr + 0x61D723);
+//	exportModel(fix.data.ptr + 0x6219EB);
+//	exportModel(fix.data.ptr + 0x620E4B);
+//	exportModel(fix.data.ptr + 0x621A23);
+//	exportModel(fix.data.ptr + 0x6231DB);
+//	exportModel(fix.data.ptr + 0x627C8B);
+//	exportModel(fix.data.ptr + 0x6293AB);
+
+	printGroupedModelInfo(fix.data.ptr + 0x18C);
 }
 
-void testModel(void* address) {
+void exportModel(void* address) {
 	import structures.model;
 
 	Model_0_0* model_0_0 = cast(Model_0_0*)address;
+	Model_0_1* model_0_1 = model_0_0.model_0_1;
 
 //	write("Vertices?"); printAddressInformation(model.gap0);
 //	write("*Vertices?"); printAddressInformation(*(cast(uint**)model.gap0));
@@ -203,29 +213,32 @@ void testModel(void* address) {
 //	printAddressInformation(model.unknownPointer3);
 
 	printAddressInformation(model_0_0.model_0_1);
-	write("\t"); printAddressInformation(model_0_0.model_0_1.model_0_2);
-	write("\t"); write("\t"); printAddressInformation(model_0_0.model_0_1.model_0_2.vertices);
-	write("\t"); write("\t"); printAddressInformation(model_0_0.model_0_1.model_0_2.unknownPointer2);
-	write("\t"); write("\t"); printAddressInformation(model_0_0.model_0_1.model_0_2.unknownPointer3);
+	write("  "); printAddressInformation(model_0_1.model_0_2);
+	write("\t"); printAddressInformation(model_0_1.model_0_2.model_0_3);
+	write("\t"); write("\t"); printAddressInformation(model_0_1.model_0_2.model_0_3.vertices);
+	write("\t"); write("\t"); printAddressInformation(model_0_1.model_0_2.model_0_3.unknownPointer2);
+	write("\t"); write("\t"); printAddressInformation(model_0_1.model_0_2.model_0_3.unknownPointer3);
 	//write("\t"); write("\t"); write("\t"); printAddressInformation(*model_0_0.model_0_1.model_0_2.unknownPointer3);
 	//write("\t"); write("\t"); write("\t"); printAddressInformation(*(model_0_0.model_0_1.model_0_2.unknownPointer3 + 4));
-	write("\t"); write("\t"); printAddressInformation(model_0_0.model_0_1.model_0_2.unknownPointer4);
-	write("\t"); write("\t"); printAddressInformation(model_0_0.model_0_1.model_0_2.model_0_3);
-	write("\t"); write("\t"); write("\t"); printAddressInformation(model_0_0.model_0_1.model_0_2.model_0_3.model_0_4);
-	write("\t"); write("\t"); write("\t"); write("\t"); printAddressInformation(model_0_0.model_0_1.model_0_2.model_0_3.model_0_4.unknownPointer1);
-	write("\t"); write("\t"); write("\t"); writeln("\t\tFace count: ", model_0_0.model_0_1.model_0_2.model_0_3.model_0_4.faceCount);
-	write("\t"); write("\t"); write("\t"); write("\t"); printAddressInformation(model_0_0.model_0_1.model_0_2.model_0_3.model_0_4.indices);
-	write("\t"); write("\t"); write("\t"); write("\t"); printAddressInformation(model_0_0.model_0_1.model_0_2.model_0_3.model_0_4.uvIndices);
-	write("\t"); write("\t"); write("\t"); write("\t"); printAddressInformation(model_0_0.model_0_1.model_0_2.model_0_3.model_0_4.vertices);
-	write("\t"); write("\t"); write("\t"); write("\t"); printAddressInformation(model_0_0.model_0_1.model_0_2.model_0_3.model_0_4.uvs);
-	write("\t"); write("\t"); write("\t"); printAddressInformation(model_0_0.model_0_1.model_0_2.model_0_3.unknownPointer2);
+	write("\t"); write("\t"); printAddressInformation(model_0_1.model_0_2.model_0_3.unknownPointer4);
+	write("\t"); write("\t"); printAddressInformation(model_0_1.model_0_2.model_0_3.model_0_4);
+	write("\t"); write("\t"); write("\t"); printAddressInformation(model_0_1.model_0_2.model_0_3.model_0_4.model_0_5);
+	write("\t"); write("\t"); write("\t"); write("\t"); printAddressInformation(model_0_1.model_0_2.model_0_3.model_0_4.model_0_5.unknownPointer1);
+	write("\t"); write("\t"); write("\t"); writeln("\t\tFace count: ", model_0_1.model_0_2.model_0_3.model_0_4.model_0_5.faceCount);
+	write("\t"); write("\t"); write("\t"); write("\t"); printAddressInformation(model_0_1.model_0_2.model_0_3.model_0_4.model_0_5.indices);
+	write("\t"); write("\t"); write("\t"); write("\t"); printAddressInformation(model_0_1.model_0_2.model_0_3.model_0_4.model_0_5.uvIndices);
+	write("\t"); write("\t"); write("\t"); write("\t"); printAddressInformation(model_0_1.model_0_2.model_0_3.model_0_4.model_0_5.vertices);
+	write("\t"); write("\t"); write("\t"); write("\t"); printAddressInformation(model_0_1.model_0_2.model_0_3.model_0_4.model_0_5.uvs);
+	write("\t"); write("\t"); write("\t"); printAddressInformation(model_0_1.model_0_2.model_0_3.model_0_4.unknownPointer2);
 
 	// Obj model creation
 
-	Model_0_4* model_0_4 = model_0_0.model_0_1.model_0_2.model_0_3.model_0_4;
-	Model_0_2* model_0_2 = model_0_0.model_0_1.model_0_2;
+	Model_0_5* model_0_4 = model_0_1.model_0_2.model_0_3.model_0_4.model_0_5;
+	Model_0_3* model_0_2 = model_0_1.model_0_2.model_0_3;
 
-	File f = File("model.obj", "w");
+	auto snaLocation = pointerToSNALocation(address);
+
+	File f = File("models/" ~ snaLocation.name ~ "_0x" ~ address.to!string ~ ".obj", "w");
 
 	ushort maxVertexIndex = 0;
 	foreach(i; 0 .. model_0_4.faceCount) {
@@ -279,6 +292,92 @@ void testModel(void* address) {
 	writeln("Done saving model");
 
 	//printAddressInformation(model_0_0.unknownPointer2);
+}
+
+void printGroupedModelInfo(void* address) {
+	import structures.model;
+
+	GroupedModel_0* groupedModel_0 = cast(GroupedModel_0*)address;
+
+	printAddressInformation(groupedModel_0);
+	write("\t"); printAddressInformation(groupedModel_0.groupedModel_1);
+	write("\t"); printAddressInformation(groupedModel_0.groupedModel_1_1);
+	write("\t\t"); printAddressInformation(groupedModel_0.groupedModel_1_1.unknownPointer1);
+	write("\t\t"); printAddressInformation(groupedModel_0.groupedModel_1_1.unknownPointer2);
+	write("\t\t"); printAddressInformation(groupedModel_0.groupedModel_1_1.name);
+}
+
+/*
+	Dumps pointer table into CSV file.
+*/
+@handler
+void dumpgpt(string[] args) {
+	debug {
+		//args ~= r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\Fix.gpt";
+		//args ~= r"D:\GOG Games\Rayman 2\Data\World\Levels\Fix.rtp";
+		//args ~= r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\Fix.sna";
+
+		args ~= r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\Learn_30\Learn_30.gpt";
+		args ~= r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\LEVELS0.DAT";
+		args ~= "67540992";
+		args ~= "545054447";
+		args ~= r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\Fix.sna";
+		args ~= r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\Learn_30\Learn_30.sna";
+	}
+
+	if(args.length < 3) {
+		writeln("Usage: dumpgpt gptfile relocationfile fixsnafile [additionalsnafile]");
+		writeln("Usage: dumpgpt gptfile bigfile bigfileoffset bigfilemagic fixsnafile [additionalsnafile]");
+		return;
+	}
+
+	string pointerTableFile = args[0];
+
+	if(!args[2].isNumeric) {
+		string relocationFile = args[1];
+		string fixSnaFile = args[2];
+		string additionalSnaFile = args.length >= 3 ? args[3] : "";
+
+		SNAFormat sna = new SNAFormat(fixSnaFile);
+		if(additionalSnaFile != "")
+			SNAFormat sna2 = new SNAFormat(fixSnaFile);
+
+		GPTFormat gpt = new GPTFormat(pointerTableFile);
+		readRelocationTableFromFile(relocationFile);
+	}
+	else {
+		string bigfile = args[1];
+		uint offset = args[2].to!uint;
+		uint magic = args[3].to!uint;
+		string fixSnaFile = args[4];
+		string additionalSnaFile = args.length >= 5 ? args[5] : "";
+		
+		SNAFormat sna = new SNAFormat(fixSnaFile);
+		if(additionalSnaFile != "")
+			SNAFormat sna2 = new SNAFormat(fixSnaFile);
+
+		readRelocationTableFromBigFile(bigfile, offset, magic);
+	}
+
+	GPTFormat gpt = new GPTFormat(pointerTableFile);
+
+	writecln(Fg.lightMagenta, "Dumping pointer table.");
+
+	string outputFilename = "dump_" ~ baseName(pointerTableFile)  ~ ".csv";
+	File file = File(outputFilename, "w");
+
+	file.writeln("sep=;\nRaw address;File;After relocation");
+
+	while(!gpt.eof) {
+		auto result = gpt.readPointerEx();
+		file.write("0x", result.rawValue.to!string(16), ";");
+		file.write(result.snaFile, ";");
+		file.write("0x", result.snaAddress.to!string(16));
+		file.writeln();
+	}
+
+	file.close();
+	writecln(Fg.lightGreen, "Done! Saved to ", Fg.white, outputFilename);
 }
 
 /*
