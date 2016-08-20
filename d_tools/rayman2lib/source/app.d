@@ -1,11 +1,11 @@
 import std.stdio, std.file, std.path, std.algorithm, std.traits, std.array, std.conv, std.string;
-import decoder, formats.gpt, formats.levels0dat, formats.sna, formats.cnt, formats.gf, global, utils;
+import decoder, formats.gpt, formats.levels0dat, formats.sna, formats.cnt, formats.gf, global, utils, structures.sector;
 import consoled, imageformats;
 
 void main(string[] args)
 {
 	debug {
-		args ~= "dumpgpt";
+		args ~= "gpt";
 	}
 
 	if(args.length <= 1) {
@@ -97,7 +97,9 @@ void readLearn_30Gpt(SNAFormat fix) {
 	GPTFormat levelGpt = new GPTFormat(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\Learn_30\Learn_30.gpt");
 	
 	// List of Learn_30.gpt pointers
-	
+
+	relocationLogging = false; // TODO: Just for testing models, remove later
+
 	auto pointerCount = levelGpt.readPointer!uint;
 
 	// TODO: Fix table reading and remove skip
@@ -124,14 +126,12 @@ void readLearn_30Gpt(SNAFormat fix) {
 	assert(levelGpt.r.position == 604, "Invalid exit position. Table reading inproper.");
 	
 	writeln("Ended reading table");
-
-	relocationLogging = true; // TODO: Just for testing models, remove later
 	
 	auto gp_stActualWorld = levelGpt.readPointer!(ubyte*);
 	auto gp_stDynamicWorld = levelGpt.readPointer!(ubyte*);
 	auto dword_500FC4 = levelGpt.readPointer!(ubyte*);
 	writeln("SECT_hFatherSector");
-	auto SECT_hFatherSector = levelGpt.readPointer!(ubyte*);
+	auto SECT_hFatherSector = levelGpt.readPointer!(Sector*);
 	auto gs_hFirstSubMapPosition = levelGpt.readPointer!(ubyte*);
 	auto g_stAlways = levelGpt.readPointerBlock(0x1C);
 	auto dword_4A6B1C = levelGpt.readPointer!(ubyte*);
@@ -172,7 +172,7 @@ void readLearn_30Gpt(SNAFormat fix) {
 	auto p_stKeyFrames = levelGpt.readBlock!uint((tdstStacks[37] - tdstStacks[39]) * 36);
 	auto p_stEvents = levelGpt.readBlock!uint((tdstStacks[41] - tdstStacks[43]) * 0xC);
 	auto p_stMorphData = levelGpt.readBlock!uint((tdstStacks[45] - tdstStacks[47]) * 8);
-	relocationLogging = true;
+	relocationLogging = false;
 
 	auto g_AlphabetCharacterPointer = levelGpt.readPointer!(ubyte*);
 	auto g_AlphabetCharacterpointer_new = levelGpt.readPointer!(ubyte**); // TODO: Raw is supposed to be 0x1B500A0, it is not
@@ -196,7 +196,9 @@ void readLearn_30Gpt(SNAFormat fix) {
 //	exportModel(fix.data.ptr + 0x627C8B);
 //	exportModel(fix.data.ptr + 0x6293AB);
 
-	printGroupedModelInfo(fix.data.ptr + 0x18C);
+	//printGroupedModelInfo(fix.data.ptr + 0x18C);
+
+	printSectorInfo(SECT_hFatherSector);
 }
 
 void exportModel(void* address) {
@@ -307,6 +309,13 @@ void printGroupedModelInfo(void* address) {
 	write("\t\t"); printAddressInformation(groupedModel_0.groupedModel_1_1.name);
 }
 
+void printSectorInfo(Sector* sector) {
+	writecln(Fg.lightMagenta, "Testing sectors");
+
+	printAddressInformation(sector);
+	sector.printChildrenInfo();
+}
+
 /*
 	Dumps pointer table into CSV file.
 */
@@ -340,7 +349,7 @@ void dumpgpt(string[] args) {
 
 		SNAFormat sna = new SNAFormat(fixSnaFile);
 		if(additionalSnaFile != "")
-			SNAFormat sna2 = new SNAFormat(fixSnaFile);
+			SNAFormat sna2 = new SNAFormat(additionalSnaFile);
 
 		GPTFormat gpt = new GPTFormat(pointerTableFile);
 		readRelocationTableFromFile(relocationFile);
@@ -354,7 +363,7 @@ void dumpgpt(string[] args) {
 		
 		SNAFormat sna = new SNAFormat(fixSnaFile);
 		if(additionalSnaFile != "")
-			SNAFormat sna2 = new SNAFormat(fixSnaFile);
+			SNAFormat sna2 = new SNAFormat(additionalSnaFile);
 
 		readRelocationTableFromBigFile(bigfile, offset, magic);
 	}
