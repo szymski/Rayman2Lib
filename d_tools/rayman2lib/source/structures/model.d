@@ -25,7 +25,7 @@ struct Model_0_1 {
 	uint unknown1; // Always? 0x00000000
 	uint unknown2; // Always? 0x01000000 (LE)
 	Model_0_2* model_0_2;
-	void* unknownPointer2;
+	void* gliData;
 }
 
 struct Model_0_2 {

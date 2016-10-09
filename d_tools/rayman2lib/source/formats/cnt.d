@@ -7,28 +7,9 @@ import utils, global;
 
 enum CNTVersion { rayman2, rayman2Vignette, rayman3, rayman3Vignette, unknown }
 
-class CNTFile {
-	CNTFormat cntArchive;
-	string directory;
-	string name;
-	uint pointer;
-	uint size;
-	ubyte[4] xorSequence;
-
-	private ubyte[] newData;
-
-	ubyte[] data() {
-		if(cntArchive !is null)
-			return cntArchive.data[pointer .. pointer + size];
-		else
-			return newData;
-	}
-
-	void data(ubyte[] newData) {
-		this.newData = newData;
-	}
-}
-
+/**
+	This class represents CNT archive.
+*/
 class CNTFormat {
 
 	string name = "Unknown";
@@ -44,16 +25,25 @@ class CNTFormat {
 	string[] directoryList;
 	CNTFile[] fileList;
 
+	/**
+		Constructs an empty CNT archive. It can be built, using this.build function.
+	*/
 	this()
 	{
 	}
 
+	/**
+		Parses a CNT file.
+	*/
 	this(string filename)
 	{
 		name = baseName(filename);
 		this(cast(ubyte[])read(filename));
 	}
-	
+
+	/**
+		Parses a CNT file.
+	*/
 	this(ubyte[] data)
 	{
 		writecln(Fg.lightMagenta, "Reading CNT");
@@ -61,7 +51,7 @@ class CNTFormat {
 		parse();
 	}
 
-	void parse() {
+	private void parse() {
 		reader = new MemoryReader(data);
 
 		directoryCount = reader.read!uint;
@@ -82,13 +72,13 @@ class CNTFormat {
 			readFile();
 	}
 
-	void readDirectory() {
+	private void readDirectory() {
 		string name = readXorredString();
 		directoryList ~= name;
 		debug writecln(Fg.white, "Directory: ", name);
 	}
 
-	void readVersion() {
+	private void readVersion() {
 		switch(reader.read!ubyte) {
 			case 246:
 				archiveVersion = CNTVersion.rayman2;
@@ -108,7 +98,7 @@ class CNTFormat {
 		}
 	}
 
-	void readFile() {
+	private void readFile() {
 		auto directoryIndex = reader.read!int;
 		auto name = readXorredString();
 		auto xorSequence = reader.read!(ubyte[4]);
@@ -145,6 +135,9 @@ class CNTFormat {
 		return str.idup;
 	}
 
+	/**
+		Builds a new CNT archive. The output is stored into this.data.
+	*/
 	void build() {
 		buildDirectoryList();
 	
@@ -215,7 +208,32 @@ class CNTFormat {
 	}
 }
 
-private T[] xorred(T)(T[] arr, ubyte key) {
+/**
+	This class represents a single file from CNT archive.
+*/
+class CNTFile {
+	CNTFormat cntArchive;
+	string directory;
+	string name;
+	uint pointer;
+	uint size;
+	ubyte[4] xorSequence;
+	
+	private ubyte[] newData;
+	
+	ubyte[] data() {
+		if(cntArchive !is null)
+			return cntArchive.data[pointer .. pointer + size];
+		else
+			return newData;
+	}
+
+	void data(ubyte[] newData) {
+		this.newData = newData;
+	}
+}
+
+private T[] xorred(T)(in T[] arr, ubyte key) {
 	T[] xorred;
 	xorred.length = arr.length;
 	

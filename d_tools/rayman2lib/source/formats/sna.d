@@ -3,7 +3,7 @@
 import std.stdio, std.conv, std.algorithm, core.memory, consoled;
 import std.file : read;
 import std.path : baseName;
-import decoder, utils, global, formats.levels0dat, formats.gpt;
+import decoder, utils, global, formats.relocationtable, formats.pointertable;
 
 struct SNAPart {
 	ubyte id;

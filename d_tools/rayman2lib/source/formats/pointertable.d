@@ -1,10 +1,13 @@
-﻿module formats.gpt;
+﻿module formats.pointertable;
 
 import std.stdio, std.conv, consoled, core.sys.windows.windows;
 import std.file : read;
 import decoder, utils, global;
 
-class GPTFormat
+/**
+	Represents a pointer table. For example .GPT file.
+*/
+class PointerTableFormat
 {
 	ubyte[] data;
 	MemoryReader r;
@@ -16,7 +19,7 @@ class GPTFormat
 	
 	this(ubyte[] data)
 	{
-		writecln(Fg.lightMagenta, "Parsing GPT");
+		writecln(Fg.lightMagenta, "Parsing pointer table");
 		this.data = data;
 		parse();
 	}
@@ -26,14 +29,23 @@ class GPTFormat
 		r = new MemoryReader(data);
 	}
 
+	/**
+		Reads a pointer and relocates it. The returned value should be a valid memory pointer.
+	*/
 	T readPointer(T = ubyte*)() {
 		return r.readPointer!T;
 	}
 
+	/**
+		Reads a pointer and relocates it. The returned value is a struct with additional pointer information.
+	*/
 	auto readPointerEx(T = ubyte*)() {
 		return r.readPointerEx!T;
 	}
 
+	/**
+		Reads a block of pointers. Size is specified in bytes.
+	*/
 	T[] readPointerBlock(T = ubyte*)(int size) {
 		assert(size % 4 == 0, "Size must be divisible by 4.");
 
@@ -60,11 +72,17 @@ class GPTFormat
 		return r.read!T;
 	}
 
-	bool eof() {
+	/**
+		Returns true, if end of file.
+	*/
+	@property bool eof() {
 		return r.eof;
 	}
 }
 
+/**
+	Reads a pointer and relocates it. The returned value should be a valid memory pointer.
+*/
 T readPointer(T = ubyte*)(MemoryReader r) {
 	uint dword0 = relocationKeyValues[pointerRelocationInfoIndex].dword0;
 	ubyte byte4 = relocationKeyValues[pointerRelocationInfoIndex].byte4, byte5 = relocationKeyValues[pointerRelocationInfoIndex].byte5;
@@ -105,6 +123,9 @@ T readPointer(T = ubyte*)(MemoryReader r) {
 	return cast(T)result;
 }
 
+/**
+	Reads a pointer and relocates it. The returned value is a struct with additional pointer information.
+*/
 auto readPointerEx(T = ubyte*)(MemoryReader r) {
 	struct return_t {
 		uint rawValue;
