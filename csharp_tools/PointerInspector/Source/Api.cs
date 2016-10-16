@@ -17,7 +17,7 @@ namespace PointerInspector.Source
             public int Value { get; set; }
         }
 
-        public static Pointer[] GetPointers()
+        public static Pointer[] GetPointers(string snaFile, string level0dat, long offset, long magic)
         {
             var process = new Process
             {
@@ -25,7 +25,8 @@ namespace PointerInspector.Source
                 {
                     FileName = "rayman2lib.exe",
                     RedirectStandardOutput = true,
-                    UseShellExecute = false
+                    UseShellExecute = false,
+                    Arguments = $"snarelocation \"{snaFile}\" \"{level0dat}\" {offset} {magic}"
                 }
             };
 

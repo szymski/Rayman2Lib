@@ -13,7 +13,7 @@ namespace PointerInspector.Source.Controls
     public enum HighlightType
     {
         Pointer,
-        PointedValue,
+        ReferencedValue,
     }
 
     public struct Highlight
@@ -22,6 +22,7 @@ namespace PointerInspector.Source.Controls
         public Color Color { get; set; }
         public int Length { get; set; }
         public HighlightType Type { get; set; }
+        public object Value { get; set; }
     }
 
     public partial class HexView : Panel
@@ -46,13 +47,58 @@ namespace PointerInspector.Source.Controls
         }
 
         private int position = 0;
+
+        public int Position
+        {
+            get { return position; }
+            set
+            {
+                if (value >= Data.Length)
+                    return;
+
+                position = value;
+                scrollBar.Value = position;
+                UpdateScrollbar();
+                UpdateHighlights();
+                Refresh();
+            }
+        }
+
         private int selectedPosition = 0;
+
+        public int SelectedPosition
+        {
+            get { return selectedPosition; }
+            set {
+                if (value >= Data.Length)
+                    return;
+
+                AddAddressToHistory(value);
+
+                selectedPosition = value;
+
+                if (selectedPosition < position || selectedPosition > position + VisibleLines * BytesInLine)
+                    Position = value;
+
+                ByteSelected?.Invoke(this, selectedPosition, currentHighlights[SelectedIndexFromFirstVisibleByte] ?? new Highlight[0]);
+                Refresh();
+            }
+        }
 
         private VScrollBar scrollBar;
 
         public Highlight[] allHighlights = { };
 
         private Highlight[][] currentHighlights = { };
+
+        public List<int> History { get; set; } = new List<int>();
+        private int historyIndex = 0;
+
+        public delegate void ByteSelectedEventHandler(object sender, int position, Highlight[] highlights);
+        public event ByteSelectedEventHandler ByteSelected;
+
+        public delegate void ByteDoubleClickEventHandler(object sender, int position, Highlight[] highlights);
+        public event ByteDoubleClickEventHandler ByteDoubleClick;
 
         public HexView()
         {
@@ -199,6 +245,7 @@ namespace PointerInspector.Source.Controls
             int y = (int)(LineHeight * Math.Floor((selectedPosition - position) / (float)BytesInLine));
 
             g.FillRectangle(selectionBrush, x - 1, y, fontWidth * 2 + 1, fontHeight);
+            g.DrawRectangle(Pens.CornflowerBlue, x - 1, y, fontWidth * 2 + 1, fontHeight);
         }
 
         private void DrawCharSelection()
@@ -207,6 +254,7 @@ namespace PointerInspector.Source.Controls
             int y = (int)(LineHeight * Math.Floor((selectedPosition - position) / (float)BytesInLine));
 
             g.FillRectangle(selectionBrush, x - 1, y, fontWidth + 1, fontHeight);
+            g.DrawRectangle(Pens.CornflowerBlue, x - 1, y, fontWidth + 1, fontHeight);
         }
 
         #endregion
@@ -254,6 +302,8 @@ namespace PointerInspector.Source.Controls
 
         private int VisibleLines => (int)Math.Ceiling(Height / LineHeight);
 
+        private int SelectedIndexFromFirstVisibleByte => selectedPosition - position;
+
         private void UpdateHighlights()
         {
             int index = 0;
@@ -292,6 +342,15 @@ namespace PointerInspector.Source.Controls
 
                 index++;
             }
+        }
+
+        public void EnsureSelectedByteVisible()
+        {
+            if (selectedPosition >= Data.Length)
+                return;
+
+            if (selectedPosition < position || selectedPosition > position + VisibleLines * BytesInLine)
+                Position = selectedPosition;
         }
 
         #endregion
@@ -348,8 +407,31 @@ namespace PointerInspector.Source.Controls
 
         protected override void OnMouseClick(MouseEventArgs e)
         {
-            int relativeX = (int)(e.X - AddressWidth - BytesOffsetFromAddress);
-            int relativeY = e.Y;
+            Focus();
+
+            HandleByteSelecting(e.X, e.Y);
+
+            AddAddressToHistory(selectedPosition);
+
+            ByteSelected?.Invoke(this, selectedPosition, currentHighlights[SelectedIndexFromFirstVisibleByte] ?? new Highlight[0]);
+
+            Refresh();
+        }
+
+        protected override void OnMouseDoubleClick(MouseEventArgs e)
+        {
+            HandleByteSelecting(e.X, e.Y);
+
+            ByteDoubleClick?.Invoke(this, selectedPosition, currentHighlights[SelectedIndexFromFirstVisibleByte] ?? new Highlight[0]);
+
+            Refresh();
+        }
+
+
+        private void HandleByteSelecting(int clickX, int clickY)
+        {
+            int relativeX = (int)(clickX - AddressWidth - BytesOffsetFromAddress);
+            int relativeY = clickY;
 
             // String character click
             if (relativeX > BytesInLine * ByteFullWidth + StringOffsetFromBytes)
@@ -372,8 +454,56 @@ namespace PointerInspector.Source.Controls
 
                 selectedPosition = Math.Min(_data.Length - 1, byteX + position + byteY * BytesInLine);
             }
+        }
 
+        #endregion
+
+        #region History
+
+        public void AddAddressToHistory(int address)
+        {
+            if (History.Count > 30)
+                History.RemoveAt(0);
+
+            if (historyIndex < History.Count - 1)
+            {
+                History.RemoveRange(historyIndex + 1, History.Count - historyIndex - 1);
+                historyIndex = History.Count;
+            }
+            else
+                historyIndex = History.Count;
+
+            historyIndex++;
+
+            History.Add(address);
+        }
+
+        public void GoBackward()
+        {
+            if (historyIndex == 0)
+                return;
+
+            historyIndex--;
+
+            selectedPosition = History[historyIndex];
+            EnsureSelectedByteVisible();
             Refresh();
+
+            ByteSelected?.Invoke(this, selectedPosition, currentHighlights[SelectedIndexFromFirstVisibleByte] ?? new Highlight[0]);
+        }
+
+        public void GoForward()
+        {
+            if (historyIndex == History.Count || historyIndex == History.Count - 1)
+                return;
+
+            historyIndex++;
+
+            selectedPosition = History[historyIndex];
+            EnsureSelectedByteVisible();
+            Refresh();
+
+            ByteSelected?.Invoke(this, selectedPosition, currentHighlights[SelectedIndexFromFirstVisibleByte] ?? new Highlight[0]);
         }
 
         #endregion
