@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rayman2Lib", "Rayman2Lib\Rayman2Lib.csproj", "{5354D159-64D2-4061-B38C-863DDE607AE5}"
 EndProject
@@ -20,6 +20,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SNAModelParser", "SNAModelParser\SNAModelParser.csproj", "{FBEFC190-48D1-4933-A640-1618467484D9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GPTReader", "GPTReader\GPTReader.csproj", "{08BAFADF-8FC6-4DBC-ACD1-DDF28C2FA08D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PointerInspector", "PointerInspector\PointerInspector.csproj", "{A5C79FAB-A134-4042-AE05-DDFA7888ACA3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,6 +65,10 @@ Global
 		{08BAFADF-8FC6-4DBC-ACD1-DDF28C2FA08D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{08BAFADF-8FC6-4DBC-ACD1-DDF28C2FA08D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{08BAFADF-8FC6-4DBC-ACD1-DDF28C2FA08D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A5C79FAB-A134-4042-AE05-DDFA7888ACA3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5C79FAB-A134-4042-AE05-DDFA7888ACA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5C79FAB-A134-4042-AE05-DDFA7888ACA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5C79FAB-A134-4042-AE05-DDFA7888ACA3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -29,15 +29,11 @@ class SNAFormat
 
 	this(ubyte[] data)
 	{
-		writecln(Fg.lightMagenta, "Parsing SNA");
+		if(logging)
+			writecln(Fg.lightMagenta, "Parsing SNA");
 		this.data = decodeData(data);
 		loadedSnas ~= this;
 		parse();
-
-		//writecln(Fg.lightMagenta, "SNA Relocation table: ");
-		//foreach(i, v; gptPointerRelocation)
-		//	if(v != 0)
-		//		writecln(Fg.white, "\t0x", i.to!string(16), ": 0x", v.to!string(16));
 	}
 
 	private void parse() {
@@ -69,7 +65,8 @@ class SNAFormat
 				uint relocationValue = cast(uint)part.dataPointer - somethingRelatedToRelocation;
 
 				if(part.size != 0) {
-					writecln(Fg.lightYellow, "Relocation id - ", Fg.white, "0x", (10 * part.id + part.block).to!string(16), ": 0x", relocationValue.to!string(16), Fg.lightYellow, "\t\tSub: ", Fg.white, "0x", somethingRelatedToRelocation.to!string(16));
+					if(logging)
+						writecln(Fg.lightYellow, "Relocation id - ", Fg.white, "0x", (10 * part.id + part.block).to!string(16), ": 0x", relocationValue.to!string(16), Fg.lightYellow, "\t\tSub: ", Fg.white, "0x", somethingRelatedToRelocation.to!string(16));
 					gptPointerRelocation[10 * part.id + part.block] = relocationValue;
 				}
 
@@ -150,8 +147,57 @@ class SNAFormat
 				//				writeln();
 			}
 		}
-		
+
 		file.close();
+	}
+
+	auto getRelocationDataUsingFile(string filename) {
+		readRelocationTableFromFile(filename);
+		
+		return getRelocationData();
+	}
+	
+	auto getRelocationDataUsingBigFile(string filename, uint offset, uint magic) {
+		readRelocationTableFromBigFile(filename, offset, magic);
+		
+		return getRelocationData();
+	}
+
+	private auto getRelocationData() {
+		struct Pointer {
+			int address;
+			int value;
+		}
+
+		Pointer[] pointers;
+
+		foreach(part; parts) {
+			if(part.size <= 0)
+				continue;
+			
+			PointerRelocationHeader header;
+			
+			foreach(relocHeader; relocationHeaders) {
+				if(relocHeader.partId == part.id && relocHeader.block == part.block) {
+					header = relocHeader;
+					break;
+				}
+			}
+			
+			foreach(i; header.index .. header.index + header.size) {
+				PointerRelocationInfo relocValue = relocationKeyValues[i];
+				
+				uint* rawAddress = cast(uint*)(relocValue.dword0 + gptPointerRelocation[10 * part.id + part.block]);
+				uint before = cast(uint)*rawAddress;
+				
+				auto snaLocation = pointerToSNALocation(cast(void*)(*rawAddress + gptPointerRelocation[10 * relocValue.byte4 + relocValue.byte5]));
+
+				if(snaLocation.valid)
+					pointers ~= Pointer(cast(uint)rawAddress - cast(uint)data.ptr, snaLocation.address);
+			}
+		}
+
+		return pointers;
 	}
 
 	void printInfo() {

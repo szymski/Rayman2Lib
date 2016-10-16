@@ -3,6 +3,8 @@
 import std.stdio, std.conv;
 import formats.sna, consoled;
 
+bool logging = true;
+
 /*
 	SNA related stuff
 */

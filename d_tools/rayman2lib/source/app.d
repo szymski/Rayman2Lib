@@ -5,9 +5,10 @@ import consoled, imageformats;
 void main(string[] args)
 {
 	debug {
-		args ~= "gpt";
+		args ~= "snarelocation";
 	}
 
+	// Print usage instruction, if no parameter given
 	if(args.length <= 1) {
 		writeln("Usage: ", args[0], " option");
 
@@ -18,6 +19,7 @@ void main(string[] args)
 		return;
 	}
 
+	// Handle the given option
 	if(auto handleFunc = args[1] in handlers)
 		(*handleFunc)(args[2 .. $]);
 	else

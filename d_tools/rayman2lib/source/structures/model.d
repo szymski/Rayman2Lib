@@ -1,34 +1,34 @@
 ﻿module structures.model;
 
-// Only the part used by GLI Send Triangles func
-//struct Model {
-//	void* gap0;
-//	ushort faceCount;
-//	ushort unknown;
-//	void* indicesPointer;
-//	void* unknownPointer1;
-//	void* unknownPointer2;
-//	void* unknownPointer3;
-//}
-
-// Model_INDEX_LEVEL
-
 /*
 	Single model elements
 */
 
+// Model_INDEX_LEVEL
+
 struct Model_0_0 {
 	Model_0_1* model_0_1;
+	Model_0_0* nextTwin;
 }
 
 struct Model_0_1 {
 	uint unknown1; // Always? 0x00000000
-	uint unknown2; // Always? 0x01000000 (LE)
-	Model_0_2* model_0_2;
+	Model_0_2* model_0_2; // Always? 0x01000000 (LE)
+	Model_1_2* model_1_2;
 	void* gliData;
 }
 
 struct Model_0_2 {
+	uint unknown1;
+	ObjectData_0_1* objectData; // Object address
+}
+
+struct ObjectData_0_1 {
+	ubyte[36] unknown;
+	uint flags;
+}
+
+struct Model_1_2 {
 	uint unknown1;
 	uint unknown2;
 	Model_0_3* model_0_3;

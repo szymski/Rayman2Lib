@@ -77,9 +77,43 @@ void resizetextures(string[] args) {
 	std.file.write(r"D:\GOG Games\Rayman 2\Data\World\Levels\Learn_30\Learn_30.sna", decodeData(levelSna.data));
 }
 
-void printSectorInfo(Sector* sector) {
-	writecln(Fg.lightMagenta, "Testing sectors");
-	
-	printAddressInformation(sector);
-	sector.printChildrenInfo();
+@handler
+void snarelocation(string[] args) {
+	debug {
+		args ~= r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\Learn_30\Learn_30.sna";
+		args ~= r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\LEVELS0.DAT";
+		args ~= "79187968";
+		args ~= "1982693709";
+	}
+
+	logging = false;
+
+	if(args.length < 3) {
+		writeln("Usage: snarelocation snafile relocationfile");
+		writeln("Usage: snarelocation snafile bigfile bigfileoffset bigfilemagic");
+		return;
+	}
+
+	string snaFile = args[0];
+
+	if(args.length < 3 || !args[2].isNumeric) {
+		string relocationFile = args[1];
+		
+		SNAFormat sna = new SNAFormat(snaFile);
+		auto pointers = sna.getRelocationDataUsingFile(relocationFile);
+
+		foreach(ptr; pointers)
+			writeln(ptr.address, " ", ptr.value);
+	}
+	else {
+		string bigfile = args[1];
+		uint offset = args[2].to!uint;
+		uint magic = args[3].to!uint;
+		
+		SNAFormat sna = new SNAFormat(snaFile);
+		auto pointers = sna.getRelocationDataUsingBigFile(bigfile, offset, magic);
+
+		foreach(ptr; pointers)
+			writeln(ptr.address, " ", ptr.value);
+	}
 }

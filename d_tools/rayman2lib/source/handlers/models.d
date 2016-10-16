@@ -7,6 +7,8 @@ mixin registerHandlers;
 
 void exportModel(void* address) {
 	import structures.model;
+
+	writeln("Exporting model");
 	
 	Model_0_0* model_0_0 = cast(Model_0_0*)address;
 	Model_0_1* model_0_1 = model_0_0.model_0_1;
@@ -19,28 +21,33 @@ void exportModel(void* address) {
 	//	printAddressInformation(model.unknownPointer3);
 	
 	printAddressInformation(model_0_0.model_0_1);
-	write("  "); printAddressInformation(model_0_1.model_0_2);
-	write("\t"); printAddressInformation(model_0_1.model_0_2.model_0_3);
-	write("\t"); write("\t"); printAddressInformation(model_0_1.model_0_2.model_0_3.vertices);
-	write("\t"); write("\t"); printAddressInformation(model_0_1.model_0_2.model_0_3.unknownPointer2);
-	write("\t"); write("\t"); printAddressInformation(model_0_1.model_0_2.model_0_3.unknownPointer3);
+	write("  "); printAddressInformation(model_0_1.model_1_2);
+	if(!model_0_1.model_1_2) {
+		writeln("Invalid model");
+		return;
+	}
+
+	write("\t"); printAddressInformation(model_0_1.model_1_2.model_0_3);
+	write("\t"); write("\t"); printAddressInformation(model_0_1.model_1_2.model_0_3.vertices);
+	write("\t"); write("\t"); printAddressInformation(model_0_1.model_1_2.model_0_3.unknownPointer2);
+	write("\t"); write("\t"); printAddressInformation(model_0_1.model_1_2.model_0_3.unknownPointer3);
 	//write("\t"); write("\t"); write("\t"); printAddressInformation(*model_0_0.model_0_1.model_0_2.unknownPointer3);
 	//write("\t"); write("\t"); write("\t"); printAddressInformation(*(model_0_0.model_0_1.model_0_2.unknownPointer3 + 4));
-	write("\t"); write("\t"); printAddressInformation(model_0_1.model_0_2.model_0_3.unknownPointer4);
-	write("\t"); write("\t"); printAddressInformation(model_0_1.model_0_2.model_0_3.model_0_4);
-	write("\t"); write("\t"); write("\t"); printAddressInformation(model_0_1.model_0_2.model_0_3.model_0_4.model_0_5);
-	write("\t"); write("\t"); write("\t"); write("\t"); printAddressInformation(model_0_1.model_0_2.model_0_3.model_0_4.model_0_5.unknownPointer1);
-	write("\t"); write("\t"); write("\t"); writeln("\t\tFace count: ", model_0_1.model_0_2.model_0_3.model_0_4.model_0_5.faceCount);
-	write("\t"); write("\t"); write("\t"); write("\t"); printAddressInformation(model_0_1.model_0_2.model_0_3.model_0_4.model_0_5.indices);
-	write("\t"); write("\t"); write("\t"); write("\t"); printAddressInformation(model_0_1.model_0_2.model_0_3.model_0_4.model_0_5.uvIndices);
-	write("\t"); write("\t"); write("\t"); write("\t"); printAddressInformation(model_0_1.model_0_2.model_0_3.model_0_4.model_0_5.vertices);
-	write("\t"); write("\t"); write("\t"); write("\t"); printAddressInformation(model_0_1.model_0_2.model_0_3.model_0_4.model_0_5.uvs);
-	write("\t"); write("\t"); write("\t"); printAddressInformation(model_0_1.model_0_2.model_0_3.model_0_4.unknownPointer2);
+	write("\t"); write("\t"); printAddressInformation(model_0_1.model_1_2.model_0_3.unknownPointer4);
+	write("\t"); write("\t"); printAddressInformation(model_0_1.model_1_2.model_0_3.model_0_4);
+	write("\t"); write("\t"); write("\t"); printAddressInformation(model_0_1.model_1_2.model_0_3.model_0_4.model_0_5);
+	write("\t"); write("\t"); write("\t"); write("\t"); printAddressInformation(model_0_1.model_1_2.model_0_3.model_0_4.model_0_5.unknownPointer1);
+	write("\t"); write("\t"); write("\t"); writeln("\t\tFace count: ", model_0_1.model_1_2.model_0_3.model_0_4.model_0_5.faceCount);
+	write("\t"); write("\t"); write("\t"); write("\t"); printAddressInformation(model_0_1.model_1_2.model_0_3.model_0_4.model_0_5.indices);
+	write("\t"); write("\t"); write("\t"); write("\t"); printAddressInformation(model_0_1.model_1_2.model_0_3.model_0_4.model_0_5.uvIndices);
+	write("\t"); write("\t"); write("\t"); write("\t"); printAddressInformation(model_0_1.model_1_2.model_0_3.model_0_4.model_0_5.vertices);
+	write("\t"); write("\t"); write("\t"); write("\t"); printAddressInformation(model_0_1.model_1_2.model_0_3.model_0_4.model_0_5.uvs);
+	write("\t"); write("\t"); write("\t"); printAddressInformation(model_0_1.model_1_2.model_0_3.model_0_4.unknownPointer2);
 	
 	// Obj model creation
 	
-	Model_0_5* model_0_4 = model_0_1.model_0_2.model_0_3.model_0_4.model_0_5;
-	Model_0_3* model_0_2 = model_0_1.model_0_2.model_0_3;
+	Model_0_5* model_0_4 = model_0_1.model_1_2.model_0_3.model_0_4.model_0_5;
+	Model_0_3* model_0_2 = model_0_1.model_1_2.model_0_3;
 	
 	auto snaLocation = pointerToSNALocation(address);
 	

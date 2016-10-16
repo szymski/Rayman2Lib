@@ -10,7 +10,8 @@ private uint magic = 0;
 	Reads relocation table from specific position from big file LEVELS0.DAT.
 */
 void readRelocationTableFromBigFile(string filename, uint position, uint magic) {
-	writeln("Reading relocation table from LEVELS0.DAT");
+	if(logging)
+		writeln("Reading relocation table from LEVELS0.DAT");
 
 	File f = File(filename, "r");
 	initBigFile(f, position, magic);
@@ -23,7 +24,8 @@ void readRelocationTableFromBigFile(string filename, uint position, uint magic) 
 	Reads relocation table from specific file, for example FIX.RTB.
 */
 void readRelocationTableFromFile(string filename) {
-	writeln("Reading relocation table from file");
+	if(logging)
+		writeln("Reading relocation table from file");
 
 	File f = File(filename, "r");
 	parseFile(f);
