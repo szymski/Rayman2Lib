@@ -36,7 +36,7 @@ void exportModel(void* address) {
 	write("\t"); write("\t"); printAddressInformation(model_0_1.model_1_2.model_0_3.unknownPointer4);
 	write("\t"); write("\t"); printAddressInformation(model_0_1.model_1_2.model_0_3.model_0_4);
 	write("\t"); write("\t"); write("\t"); printAddressInformation(model_0_1.model_1_2.model_0_3.model_0_4.model_0_5);
-	write("\t"); write("\t"); write("\t"); write("\t"); printAddressInformation(model_0_1.model_1_2.model_0_3.model_0_4.model_0_5.unknownPointer1);
+	write("\t"); write("\t"); write("\t"); write("\t"); printAddressInformation(model_0_1.model_1_2.model_0_3.model_0_4.model_0_5.textureInfo_0);
 	write("\t"); write("\t"); write("\t"); writeln("\t\tFace count: ", model_0_1.model_1_2.model_0_3.model_0_4.model_0_5.faceCount);
 	write("\t"); write("\t"); write("\t"); write("\t"); printAddressInformation(model_0_1.model_1_2.model_0_3.model_0_4.model_0_5.indices);
 	write("\t"); write("\t"); write("\t"); write("\t"); printAddressInformation(model_0_1.model_1_2.model_0_3.model_0_4.model_0_5.uvIndices);

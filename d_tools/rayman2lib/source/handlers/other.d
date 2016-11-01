@@ -1,7 +1,7 @@
 ﻿module handlers.other;
 
 import std.stdio, std.file, std.path, std.algorithm, std.traits, std.array, std.conv, std.string, consoled, imageformats;
-import app, decoder, formats.pointertable, formats.relocationtable, formats.sna, formats.cnt, formats.gf, global, utils, structures.sector;
+import app, decoder, formats.pointertable, formats.relocationtable, formats.sna, formats.cnt, formats.gf, global, utils, structures.sector, structures.model;
 
 mixin registerHandlers;
 
@@ -34,23 +34,6 @@ void ptx(string[] args) {
 	Doesn't work for some reason.
 */
 
-struct GliTexture
-{
-	ubyte[8] something1_2;
-	uint something3;
-	ubyte[8] something4_5;
-	uint something6;
-	ushort h;
-	ushort w;
-	ushort h2;
-	ushort w2;
-	ubyte[12] gap20;
-	uint dword2C; 
-	ubyte[21] gap30;
-	ubyte byte45;
-	char[130] textureFilename;
-};
-
 @handler
 void resizetextures(string[] args) {
 	SNAFormat levelSna = new SNAFormat(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\Learn_30\Learn_30.sna");
@@ -61,7 +44,7 @@ void resizetextures(string[] args) {
 	uint count = ptx.read!uint / 4;
 	
 	foreach(i; 0 .. count) {
-		auto texture = ptx.readPointer!(GliTexture*);
+		auto texture = ptx.readPointer!(TextureInfo_2*);
 		
 		if(texture !is null) {
 			printStruct(*texture);
@@ -88,7 +71,7 @@ void snarelocation(string[] args) {
 
 	logging = false;
 
-	if(args.length < 3) {
+	if(args.length < 2) {
 		writeln("Usage: snarelocation snafile relocationfile");
 		writeln("Usage: snarelocation snafile bigfile bigfileoffset bigfilemagic");
 		return;
@@ -115,5 +98,37 @@ void snarelocation(string[] args) {
 
 		foreach(ptr; pointers)
 			writeln(ptr.address, " ", ptr.value);
+	}
+}
+
+@handler
+void decodeall(string[] args) {
+	debug {
+		args ~= r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\";
+	}
+
+	if(args.length == 0) {
+		writeln("Usage: decodeall path [wildcardfilename]");
+		return;
+	}
+
+	string path = args[0];
+	string wildcard = args.length >= 2 ? args[1] : "*.sna";
+
+	foreach(entry; dirEntries(path, wildcard, SpanMode.depth)) {
+		string afterDecodeName = entry.name.dirName ~ "/" ~ entry.name.baseName ~ ".decoded";
+
+		writecln(Fg.lightGreen, "Decoding ", Fg.white, entry.name.baseName, Fg.lightGreen, " to ", Fg.white, afterDecodeName.baseName);
+
+		auto file = File(entry.name);
+
+		ubyte[] data = new ubyte[cast(uint)file.size];
+
+		file.rawRead(data);
+		file.close();
+
+		data = decodeData(data);
+
+		std.file.write(afterDecodeName, data);
 	}
 }

@@ -1,5 +1,6 @@
 ﻿module structures.sector;
 
+import structures.model;
 import global;
 import consoled;
 
@@ -9,6 +10,8 @@ struct Sector {
 	Sector* firstChild;
 	ubyte[8] unknown2;
 	Sector* nextTwin;
+	ubyte[20] unknown3;
+	void* someShit;
 
 	Sector*[] getChildren() {
 		Sector*[] children;
@@ -32,7 +35,7 @@ struct Sector {
 			printAddressInformation(child);
 
 			writec("Some addr: ");
-			printAddressInformation(child.info0.modelAddress);
+			printAddressInformation(child.info0.firstModel);
 
 			child.printChildrenInfo(level + 1);
 		}
@@ -40,8 +43,10 @@ struct Sector {
 }
 
 struct SectorInfo_0 {
-	ubyte* modelAddress;
-	ubyte[92] unknown;
+	Model_0_0* firstModel; // sectorInfo?
+	void* radiosity;
+	void* lightType;
+	ubyte[84] unknown1;
 	ubyte* minPointInBorder;
 	ubyte[8] unknown2;
 	ubyte* maxPointInBorder;

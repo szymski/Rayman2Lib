@@ -27,27 +27,33 @@ void sectors(string[]) {
 
 	printSectorInfo(levelGpt.SECT_hFatherSector);
 
-	writeln("Model info");
+	writeln("\nModel info");
 
 	import handlers.models;
 
-	Model_0_0* model = cast(Model_0_0*)(levelSna.data.ptr + 0xAB25C);
+//	Model_0_0* model = cast(Model_0_0*)(levelSna.data.ptr + 0xAB25C);
+//
+//	do {
+//		printAddressInformation(model);
+//
+//		writeln(model.model_0_1.model_0_2);
+//		printAddressInformation(model.model_0_1.model_0_2.objectData);
+//
+//		if(model.model_0_1.model_0_2.objectData.flags & 2) {
+//			writeln("DAMN!");
+//		}
+//
+//		//if(model.model_0_1)
+//		//	exportModel(model);
+//
+//		model = model.nextTwin;
+//	} while(model);
 
-	do {
-		printAddressInformation(model);
+	Sector* sector = cast(Sector*)(levelSna.data.ptr + 0x37458);
 
-		writeln(model.model_0_1.model_0_2);
-		printAddressInformation(model.model_0_1.model_0_2.objectData);
+	printAddressInformation(sector.info0.firstModel);
 
-		if(model.model_0_1.model_0_2.objectData.flags & 2) {
-			writeln("DAMN!");
-		}
-
-		//if(model.model_0_1)
-		//	exportModel(model);
-
-		model = model.nextTwin;
-	} while(model);
+	writeln(sector.info0.firstModel.model_0_1.model_1_2.model_0_3.model_0_4.model_0_5.textureInfo_0.textureInfo_1.textureInfo_2.textureFilename);
 }
 
 void printSectorInfo(Sector* sector) {

@@ -49,7 +49,7 @@ struct Model_0_4 {
 }
 
 struct Model_0_5 {
-	void* unknownPointer1;
+	TextureInfo_0* textureInfo_0;
 	ushort faceCount;
 	ushort unknown;
 	VertexFace* indices;
@@ -79,6 +79,36 @@ struct UV {
 struct UVFace {
 	ushort xIndex, yIndex, zIndex;
 }
+
+/*
+	Texture info
+*/
+
+struct TextureInfo_0 {
+	TextureInfo_1* textureInfo_1;
+}
+
+struct TextureInfo_1 {
+	ubyte[72] unknown;
+	TextureInfo_2* textureInfo_2;
+}
+
+struct TextureInfo_2
+{
+	ubyte[8] something1_2;
+	uint something3;
+	ubyte[8] something4_5;
+	uint something6;
+	ushort h;
+	ushort w;
+	ushort h2;
+	ushort w2;
+	ubyte[12] gap20;
+	uint dword2C; 
+	ubyte[21] gap30;
+	ubyte byte45;
+	char[130] textureFilename;
+};
 
 /*
 	Grouped models
