@@ -41,11 +41,21 @@ struct Model_0_3 {
 	uint unknown;
 	void* unknownPointer4;
 	Model_0_4* model_0_4;
+	ubyte[22] unknown2;
+	ushort subModelCount;
+
+	Model_0_5*[] submodels() {
+		Model_0_5*[] result;
+
+		foreach(i; 0 .. subModelCount)
+			result ~= (model_0_4 + i).model_0_5;
+
+		return result;
+	}
 }
 
 struct Model_0_4 {
 	Model_0_5* model_0_5;
-	void* unknownPointer2;
 }
 
 struct Model_0_5 {
@@ -54,14 +64,8 @@ struct Model_0_5 {
 	ushort unknown;
 	VertexFace* indices;
 	UVFace* uvIndices; // float u, float v
-	float* vertices; // float 1, float 2, float 3, float 4 - No idea what this is
+	Vertex* normals; // NOT SURE
 	UV* uvs;
-}
-
-struct VertexIndex {
-	ushort xIndex;
-	ushort yIndex;
-	ushort zIndex;
 }
 
 struct Vertex {

@@ -58,7 +58,7 @@ class PointerTableFormat
 	}
 
 	T[] readBlock(T = uint)(int size) {
-		assert(size % 4 == 0, "Size must be divisible by 4.");
+		//assert(size % 4 == 0, "Size must be divisible by 4.");
 		
 		T[] arr;
 		

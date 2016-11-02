@@ -36,7 +36,7 @@ struct Sector {
 
 			writec("Some addr: ");
 			printAddressInformation(child.info0.firstModel);
-
+				
 			child.printChildrenInfo(level + 1);
 		}
 	}
