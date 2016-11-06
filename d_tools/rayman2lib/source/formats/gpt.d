@@ -56,7 +56,7 @@ class FixGPT : GPTFormat {
 		super(data);
 	}
 
-	void parse() {
+	override void parse() {
 		POS_g_p_stIdentityMatrix = pt.readPointer!(float*);
 		
 		foreach(i; 0 .. 50)
@@ -91,9 +91,9 @@ class FixGPT : GPTFormat {
 	Represents level GPT file.
 */
 class LevelGPT : GPTFormat {
-	ubyte* gp_stActualWorld;
-	ubyte* gp_stDynamicWorld;
-	ubyte* dword_500FC4;
+	Sector* gp_stActualWorld;
+	Sector* gp_stDynamicWorld;
+	Sector* gp_stInactiveDynamicWorld;
 	Sector* SECT_hFatherSector;
 	ubyte* gs_hFirstSubMapPosition;
 	ubyte*[] g_stAlways;
@@ -142,7 +142,7 @@ class LevelGPT : GPTFormat {
 		super(data);
 	}
 	
-	void parse() {
+	override void parse() {
 		auto pointerCount = pt.readPointer!uint;
 		
 		// TODO: Fix table reading and remove skip
@@ -165,14 +165,14 @@ class LevelGPT : GPTFormat {
 		//		}
 		//		writeln("End reading table");
 		//	}
-		
+
 		assert(pt.r.position == 604, "Invalid exit position. Table reading inproper.");
 		
 		writeln("Ended reading table");
 		
-		gp_stActualWorld = pt.readPointer!(ubyte*);
-		gp_stDynamicWorld = pt.readPointer!(ubyte*);
-		dword_500FC4 = pt.readPointer!(ubyte*);
+		gp_stActualWorld = pt.readPointer!(Sector*);
+		gp_stDynamicWorld = pt.readPointer!(Sector*);
+		gp_stInactiveDynamicWorld = pt.readPointer!(Sector*);
 		writeln("SECT_hFatherSector");
 		SECT_hFatherSector = pt.readPointer!(Sector*);
 		gs_hFirstSubMapPosition = pt.readPointer!(ubyte*);

@@ -127,7 +127,7 @@ void exportModel_NEW(void* address) {
 
 	foreach(j, model_0_5; model_0_3.submodels) {
 
-		if(!model_0_5.textureInfo_0 || !model_0_5.textureInfo_0.textureInfo_1 || !model_0_5.textureInfo_0.textureInfo_1.textureInfo_2) {
+		if(!model_0_5.textureInfo_0 || !model_0_5.textureInfo_0.textureInfo_1 || !model_0_5.textureInfo_0.textureInfo_1.textureInfo_2 || !model_0_5.indices) {
 			writeln("Shitty submodel");
 			continue;
 		}

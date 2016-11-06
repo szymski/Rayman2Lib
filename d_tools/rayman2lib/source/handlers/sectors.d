@@ -24,26 +24,29 @@ void sectors(string[]) {
 
 	SNAFormat levelSna = new SNAFormat(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\Learn_30\Learn_30.sna");
 	levelSna.relocatePointersUsingBigFile(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\LEVELS0.DAT", 79187968, 0x762D814D);
-	readRelocationTableFromBigFile(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\LEVELS0.DAT", 67540992, 0x207CDEEF);
 
+	readRelocationTableFromBigFile(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\LEVELS0.DAT", 67540992, 0x207CDEEF);
 	LevelGPT levelGpt = new LevelGPT(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\Learn_30\Learn_30.gpt");
 
-
 	
-//	SNAFormat levelSna = new SNAFormat(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\Ski_10\Ski_10.sna");
-//	levelSna.relocatePointersUsingBigFile(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\LEVELS0.DAT", 0x4A78000, 0x3B691C8E);
+//	SNAFormat levelSna = new SNAFormat(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\Ly_10\Ly_10.sna");
+//	levelSna.relocatePointersUsingBigFile(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\LEVELS0.DAT", 0x74B5000, 0x435FA90A);
 //
-//	readRelocationTableFromBigFile(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\LEVELS0.DAT", 0x306E800, 0x55CE750B);
-//	LevelGPT levelGpt = new LevelGPT(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\Ski_10\Ski_10.gpt");
+//	readRelocationTableFromBigFile(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\LEVELS0.DAT", 0x1475000, 0x431E020A);
+//	LevelGPT levelGpt = new LevelGPT(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\Ly_10\Ly_10.gpt");
+//
 
+	printAddressInformation(levelGpt.gp_stDynamicWorld);
 
-
-
-	printSectorInfo(levelGpt.SECT_hFatherSector);
+	//printSectorInfo(levelGpt.SECT_hFatherSector);
 
 	writeln("\nModel info");
 
 	import handlers.models;
+
+
+//	exportModel_NEW(cast(Model_0_0*)(levelSna.data.ptr + 0xA7DF4));
+
 
 //	Model_0_0* model = cast(Model_0_0*)(levelSna.data.ptr + 0xAB25C);
 //
@@ -95,20 +98,70 @@ void sectors(string[]) {
 
 
 
-	void exportAllModels(Sector* sector) {
-		auto currSector = sector;
+//	void exportAllModels(Sector* sector) {
+//		foreach(currSector; sector.getTwins()) {
+//			printAddressInformation(currSector);
+//			writeln("Type: ", currSector.type);
+//			if(currSector.info0) {
+//				write("Entity: "); printAddressInformation(currSector.info0.firstEntity);
+//			
+//				if(currSector.type == 32 || currSector.type == 8 || currSector.type == 4) {
+//					if(currSector.info0.firstModel)
+//						exportModel_NEW(currSector.info0.firstModel);
+//				}
+//			}
+//
+//			if(currSector.firstChild)
+//				exportAllModels(currSector.firstChild);
+//		}
+//	}
+//
+//	exportAllModels(levelGpt.SECT_hFatherSector);
+	//exportAllModels(levelGpt.gp_stDynamicWorld);
 
-		writeln("");
-		printAddressInformation(currSector);
-		writeln("Type: ", currSector.type);
-		write("Info0: "); printAddressInformation(currSector.info0);
-		writeln("");
 
-		foreach(child; sector.getChildren)
-			exportAllModels(child);
+
+
+//	void printEntityInfo(Sector* sector, int depth = 0) {
+//		string tabStr = "";
+//		foreach(i; 0 .. depth)
+//			tabStr ~= "    ";
+//
+//		foreach(currSector; sector.getTwins()) {
+//			writeln(tabStr, "---------");
+//			write(tabStr); printAddressInformation(currSector);
+//			write(tabStr); writeln("Type: ", currSector.type);
+//			if(currSector.info0) {
+//				write(tabStr); write("Entity: "); printAddressInformation(currSector.info0.firstEntity);
+//			}
+//			writeln(tabStr, "---------");
+//
+//			if(currSector.firstChild)
+//				printEntityInfo(currSector.firstChild, depth + 1);
+//		}
+//	}
+
+	void printEntityInfo(Sector* sector, int depth = 0) {
+		string tabStr = "";
+		foreach(i; 0 .. depth)
+			tabStr ~= "    ";
+		
+
+		writeln(tabStr, "---------");
+		write(tabStr); printAddressInformation(sector);
+		write(tabStr); writeln("Type: ", sector.type);
+		if(sector.info0) {
+			write(tabStr); write("Entity: "); printAddressInformation(sector.info0.firstEntity);
+			write(tabStr); write("Radiosity: "); printAddressInformation(sector.info0.radiosity);
+		}
+		writeln(tabStr, "---------");
+
+
+		foreach(child; sector.getChildren())
+			printEntityInfo(child, depth + 1);
 	}
-
-	exportAllModels(levelGpt.SECT_hFatherSector);
+	
+	printEntityInfo(levelGpt.gp_stDynamicWorld);
 
 
 

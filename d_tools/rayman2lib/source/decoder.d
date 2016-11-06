@@ -1,5 +1,7 @@
 ﻿module decoder;
 
+import std.stdio, utils;
+
 enum uint firstMagicNumber = 1790299257;
 
 /**
@@ -28,4 +30,18 @@ uint getNextMagic(uint currentMagic) {
 */
 ubyte decodeByte(ubyte toDecode, uint magic) {
 	return toDecode ^ ((magic >> 8) & 0xFF);
+}
+
+/**
+	Reads data from file and decodes it using magic number.
+*/
+T readEncoded(T)(File f, ref uint magic) {
+	ubyte[T.sizeof] bytes;
+	
+	foreach(i; 0 .. T.sizeof) {
+		bytes[i] = decodeByte(f.readType!ubyte, magic);
+		magic = getNextMagic(magic);
+	}
+	
+	return *(cast(T*)bytes.ptr);
 }

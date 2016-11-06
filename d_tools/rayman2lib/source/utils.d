@@ -129,7 +129,32 @@ T readType(T)(File f) {
 	}
 }
 
+void readTo(File f, void* dst, size_t size) {
+	void[] buffer = new void[size];
+	f.rawRead(buffer);
+	dst[0 .. size] = buffer;
+}
+
 void printStruct(T)(T obj) {
 	foreach(member; __traits(allMembers, T))
 		mixin("writeln(\"" ~ member ~ "\", \": \", obj." ~ member ~ ");");
+}
+
+struct SplitInt {
+	union {
+		uint value;
+		struct {
+			ubyte byte0;
+			ubyte byte1;
+			ubyte byte2;
+			ubyte byte3;
+		}
+	}
+	
+	SplitInt opAssign(int newValue) {
+		value = newValue;
+		return this;
+	}
+	
+	alias value this;
 }

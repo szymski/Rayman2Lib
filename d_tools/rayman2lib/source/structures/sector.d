@@ -13,6 +13,22 @@ struct Sector {
 	ubyte[20] unknown3;
 	void* someShit;
 
+	/**
+		Includes self.
+	*/
+	Sector*[] getTwins() {
+		Sector*[] twins;
+
+		Sector* twin = &this;
+		
+		while(twin != null) {
+			twins ~= twin;
+			twin = twin.nextTwin;
+		}
+		
+		return twins;
+	}
+
 	Sector*[] getChildren() {
 		Sector*[] children;
 
@@ -43,11 +59,18 @@ struct Sector {
 }
 
 struct SectorInfo_0 {
-	Model_0_0* firstModel; // sectorInfo?
+	union {
+		Model_0_0* firstModel; // sectorInfo?
+		Entity* firstEntity;
+	}
 	void* radiosity;
 	void* lightType;
 	ubyte[84] unknown1;
 	ubyte* minPointInBorder;
 	ubyte[8] unknown2;
 	ubyte* maxPointInBorder;
+}
+
+struct Entity {
+	
 }
