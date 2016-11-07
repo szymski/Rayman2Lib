@@ -60,3 +60,19 @@ auto printAddressInformation(void* address) {
 	else
 		writecln("Not a valid SNA address");
 }
+
+/**
+	Index of the level in this table is the index of relocation table used by the level.
+*/
+string[] levelList = [
+	"Menu", "Jail_10", "Jail_20", "Mapmonde", "Learn_10", "Learn_30", "Bonux", "Learn_31",
+	"Bast_20", "Bast_22", "Learn_60", "Ski_10", "Vulca_10", "Vulca_20", "Ski_60",
+	"Batam_10", "Chase_10", "Ly_10", "Chase_22", "Rodeo_10", "Rodeo_40", "Rodeo_60",
+	"nego_10", "Water_10", "Water_20", "GLob_30", "GLob_10", "GLob_20", "Whale_00",
+	"Whale_05", "Whale_10", "Plum_00", "Plum_10", "Bast_09", "Bast_10", "Cask_10",
+	"Cask_30", "Batam_20", "Nave_10", "Nave_15", "Nave_20", "Seat_10", "Seat_11",
+	"Earth_10", "Earth_20", "Ly_20", "Earth_30", "Helic_10", "Helic_20", "Helic_30",
+	"Plum_20", "Morb_00", "Morb_10", "Morb_20", "Learn_40", "Ball", "ile_10", "Mine_10",
+	"Boat01", "Boat02", "Astro_00", "Astro_10", "Rhop_10", "end_10", "staff_10",
+	"poloc_10", "poloc_20", "poloc_30", "poloc_40", "Raycap",
+];

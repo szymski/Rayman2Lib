@@ -18,8 +18,9 @@ void readdat(string[] args) {
 
 	File f = File(args[0]);
 
-	uint dataOffset = f.getOffsetInBigFile(0);
-	uint magic = getMagicForTable(0);
+	uint table = 0xF40E0005;
+	uint dataOffset = f.getOffsetInBigFile(table);
+	uint magic = getMagicForTable(table);
 
 	f.seek(dataOffset);
 
@@ -29,7 +30,13 @@ void readdat(string[] args) {
 //	File outF = File("out.bin", "w");
 //
 //	foreach(i; 0 .. 0xFFFFF) {
-//		outF.write("__OFFSET: 0x" ~  ~ "__");
+//		uint dataOffset = f.getOffsetInBigFile(i);
+//		uint magic = getMagicForTable(i);
+//
+//		outF.write("__TABLE: ", i, "__");
+//
+//		f.seek(dataOffset);
+//		outF.rawWrite(f.readEncoded!(ubyte[100])(magic));
 //	}
 //
 //	outF.close();

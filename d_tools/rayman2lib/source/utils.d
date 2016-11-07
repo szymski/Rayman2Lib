@@ -18,6 +18,16 @@ class MemoryReader {
 			position += t.sizeof;
 			return t;
 		}
+		else static if(is(T : string)) {
+			string str;
+
+			while(data[position] != 0) {
+				str ~= cast(char)data[position];
+				position++;
+			}
+
+			return str;
+		}
 		else {
 			T value = *(cast(T*)data[position .. position + T.sizeof].ptr);
 			position += T.sizeof;

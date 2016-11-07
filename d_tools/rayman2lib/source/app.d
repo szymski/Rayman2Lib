@@ -5,7 +5,7 @@ import consoled, imageformats;
 void main(string[] args)
 {
 	debug {
-		args ~= "readdat";
+		args ~= "sectors";
 	}
 
 	// Print usage instruction, if no parameter given

@@ -1,8 +1,10 @@
 ﻿module formats.relocationtable;
 
-import decoder, utils, global, consoled;
+import decoder, utils, global, consoled, formats.datfile;
 import std.file : read;
 import std.stdio, std.conv;
+import std.algorithm : countUntil;
+import std.string : toLower;
 
 private uint magic = 0;
 
@@ -18,6 +20,41 @@ void readRelocationTableFromBigFile(string filename, uint position, uint magic) 
 	parseBigFile(f);
 
 	pointerRelocationInfoIndex = 0;
+}
+
+enum RelocationTableType {
+	rtb = 0,
+	gpt = 1,
+	rts = 2, // NOT SURE
+}
+
+/**
+	Automatically loads relocation table based on level name and table type.
+*/
+void readRelocationTableFromBigFileAuto(string filename, string levelname, RelocationTableType type) {
+	File f = File(filename, "r");
+
+	SplitInt id;
+	id = getLevelId(levelname);
+	id.byte1 = cast(ubyte)type;
+
+	uint offset = f.getOffsetInBigFile(id.value);
+	uint magic = getMagicForTable(id.value);
+
+	initBigFile(f, offset , magic);
+	parseBigFile(f);
+
+	f.close();
+
+	pointerRelocationInfoIndex = 0;
+}
+
+/**
+	Gets level id based on name. The id is a relocation table id.
+*/
+private uint getLevelId(string filename) {
+	filename = filename.toLower;
+	return levelList.countUntil!(l => l.toLower == filename);
 }
 
 /**

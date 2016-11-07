@@ -10,7 +10,7 @@ struct DATHeader {
 	int field_C;
 }
 
-uint getOffsetInBigFile(File f, uint tableToLoad) {
+uint getOffsetInBigFile(File f, ref uint tableToLoad) {
 	f.seek(0);
 
 	DATHeader header = f.readType!DATHeader;
@@ -49,15 +49,15 @@ uint getOffsetInBigFile(File f, uint tableToLoad) {
 	header.field_0 += header.field_8;
 	header.field_4 += header.field_C;
 	
-	printStruct(header);
-	
-	writeln(levels0DatValue_0.to!string(16));
-	writeln(levels0DatValue_1.to!string(16));
-	writeln(levels0DatValue_2.to!string(16));
-	writeln(levels0DatValue_3.to!string(16));
-	writeln(levels0DatValue_4.to!string(16));
-	writeln(levels0DatValue_5.to!string(16));
-	
+//	printStruct(header);
+//	
+//	writeln(levels0DatValue_0.to!string(16));
+//	writeln(levels0DatValue_1.to!string(16));
+//	writeln(levels0DatValue_2.to!string(16));
+//	writeln(levels0DatValue_3.to!string(16));
+//	writeln(levels0DatValue_4.to!string(16));
+//	writeln(levels0DatValue_5.to!string(16));
+//	
 	// Get offset with sinus header - SNA_fn_hGetOffSetInBigFileWithSinusHeader
 	
 	SplitInt SNA_g_ucNextRelocationTableToLoad;
@@ -135,7 +135,9 @@ uint getOffsetInBigFile(File f, uint tableToLoad) {
 	uint value1 = f.readType!uint;
 	
 	uint dataOffset = header.field_4 ^ (value1 - header.field_0);
-	
+
+	tableToLoad = SNA_g_ucNextRelocationTableToLoad;
+
 	return dataOffset;
 }
 
@@ -145,5 +147,7 @@ uint getMagicForTable(uint tableToLoad) {
 
 	SNA_g_ucNextRelocationTableToLoad.byte3 = ~SNA_g_ucNextRelocationTableToLoad.byte2;
 
-	return 16807 * (cast(uint)SNA_g_ucNextRelocationTableToLoad ^ 0x75BD924) - 0x7FFFFFFF * ((cast(uint)SNA_g_ucNextRelocationTableToLoad ^ 0x75BD924) / 0x1F31D);
+	return getNextMagic(SNA_g_ucNextRelocationTableToLoad);
+
+	//return cast(uint)(16807 * (cast(uint)SNA_g_ucNextRelocationTableToLoad ^ 0x75BD924) - 0x7FFFFFFF * ((SNA_g_ucNextRelocationTableToLoad ^ 0x75BD924) / 0x1F31D));
 }

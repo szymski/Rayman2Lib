@@ -1,6 +1,6 @@
 ﻿module formats.sna;
 
-import std.stdio, std.conv, std.algorithm, core.memory, consoled;
+import std.stdio, std.conv, std.algorithm, core.memory, consoled, std.array;
 import std.file : read;
 import std.path : baseName;
 import decoder, utils, global, formats.relocationtable, formats.pointertable;
@@ -23,7 +23,7 @@ class SNAFormat
 
 	this(string filename)
 	{
-		name = baseName(filename);
+		name = baseName(filename).replace(".sna", "");
 		this(cast(ubyte[])read(filename));
 	}
 
@@ -101,6 +101,13 @@ class SNAFormat
 		relocate();
 	}
 
+	void relocatePointersUsingBigFileAuto(string filename) {
+		writecln(Fg.lightMagenta, "Relocating SNA pointers using big file");
+		readRelocationTableFromBigFileAuto(filename, name, RelocationTableType.rtb);
+		
+		relocate();
+	}
+
 	private void relocate() {
 		// TODO: Debug file, remove later
 		import std.stdio;
@@ -159,6 +166,12 @@ class SNAFormat
 	
 	auto getRelocationDataUsingBigFile(string filename, uint offset, uint magic) {
 		readRelocationTableFromBigFile(filename, offset, magic);
+		
+		return getRelocationData();
+	}
+
+	auto getRelocationDataUsingBigFileAuto(string filename) {
+		readRelocationTableFromBigFileAuto(filename, name, RelocationTableType.rtb);
 		
 		return getRelocationData();
 	}

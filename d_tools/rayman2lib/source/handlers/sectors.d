@@ -10,7 +10,7 @@ mixin registerHandlers;
 */
 
 @handler
-void sectors(string[]) {
+void sectors(string[] args) {
 	relocationLogging = false;
 
 
@@ -22,11 +22,17 @@ void sectors(string[]) {
 	readRelocationTableFromFile(r"D:\GOG Games\Rayman 2\Data\World\Levels\Fix.rtp");
 	FixGPT fixGpt = new FixGPT(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\Fix.gpt");
 
-	SNAFormat levelSna = new SNAFormat(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\Learn_30\Learn_30.sna");
-	levelSna.relocatePointersUsingBigFile(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\LEVELS0.DAT", 79187968, 0x762D814D);
+	string levelName = "Whale_00";
 
-	readRelocationTableFromBigFile(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\LEVELS0.DAT", 67540992, 0x207CDEEF);
-	LevelGPT levelGpt = new LevelGPT(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\Learn_30\Learn_30.gpt");
+	SNAFormat levelSna = new SNAFormat(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\" ~ levelName ~ r"\" ~ levelName ~ ".sna");
+	levelSna.relocatePointersUsingBigFileAuto(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\LEVELS0.DAT");
+	readRelocationTableFromBigFileAuto(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\LEVELS0.DAT", levelName, RelocationTableType.gpt);
+	LevelGPT levelGpt = new LevelGPT(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\" ~ levelName ~ r"\" ~ levelName ~ ".gpt");
+
+
+
+
+
 
 	
 //	SNAFormat levelSna = new SNAFormat(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\Ly_10\Ly_10.sna");
@@ -98,25 +104,25 @@ void sectors(string[]) {
 
 
 
-//	void exportAllModels(Sector* sector) {
-//		foreach(currSector; sector.getTwins()) {
-//			printAddressInformation(currSector);
-//			writeln("Type: ", currSector.type);
-//			if(currSector.info0) {
-//				write("Entity: "); printAddressInformation(currSector.info0.firstEntity);
-//			
-//				if(currSector.type == 32 || currSector.type == 8 || currSector.type == 4) {
-//					if(currSector.info0.firstModel)
-//						exportModel_NEW(currSector.info0.firstModel);
-//				}
-//			}
-//
-//			if(currSector.firstChild)
-//				exportAllModels(currSector.firstChild);
-//		}
-//	}
-//
-//	exportAllModels(levelGpt.SECT_hFatherSector);
+	void exportAllModels(Sector* sector) {
+		foreach(currSector; sector.getTwins()) {
+			printAddressInformation(currSector);
+			writeln("Type: ", currSector.type);
+			if(currSector.info0) {
+				write("Entity: "); printAddressInformation(currSector.info0.firstEntity);
+			
+				if(currSector.type == 32 || currSector.type == 8 || currSector.type == 4) {
+					if(currSector.info0.firstModel)
+						exportModel_NEW(currSector.info0.firstModel);
+				}
+			}
+
+			if(currSector.firstChild)
+				exportAllModels(currSector.firstChild);
+		}
+	}
+
+	exportAllModels(levelGpt.SECT_hFatherSector);
 	//exportAllModels(levelGpt.gp_stDynamicWorld);
 
 
@@ -141,27 +147,27 @@ void sectors(string[]) {
 //		}
 //	}
 
-	void printEntityInfo(Sector* sector, int depth = 0) {
-		string tabStr = "";
-		foreach(i; 0 .. depth)
-			tabStr ~= "    ";
-		
-
-		writeln(tabStr, "---------");
-		write(tabStr); printAddressInformation(sector);
-		write(tabStr); writeln("Type: ", sector.type);
-		if(sector.info0) {
-			write(tabStr); write("Entity: "); printAddressInformation(sector.info0.firstEntity);
-			write(tabStr); write("Radiosity: "); printAddressInformation(sector.info0.radiosity);
-		}
-		writeln(tabStr, "---------");
-
-
-		foreach(child; sector.getChildren())
-			printEntityInfo(child, depth + 1);
-	}
-	
-	printEntityInfo(levelGpt.gp_stDynamicWorld);
+//	void printEntityInfo(Sector* sector, int depth = 0) {
+//		string tabStr = "";
+//		foreach(i; 0 .. depth)
+//			tabStr ~= "    ";
+//		
+//
+//		writeln(tabStr, "---------");
+//		write(tabStr); printAddressInformation(sector);
+//		write(tabStr); writeln("Type: ", sector.type);
+//		if(sector.info0) {
+//			write(tabStr); write("Entity: "); printAddressInformation(sector.info0.firstEntity);
+//			write(tabStr); write("Radiosity: "); printAddressInformation(sector.info0.radiosity);
+//		}
+//		writeln(tabStr, "---------");
+//
+//
+//		foreach(child; sector.getChildren())
+//			printEntityInfo(child, depth + 1);
+//	}
+//	
+//	printEntityInfo(levelGpt.gp_stDynamicWorld);
 
 
 
