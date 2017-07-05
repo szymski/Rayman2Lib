@@ -1,16 +1,24 @@
 ﻿module structures.sector;
 
-import structures.model;
+import structures.model, structures.entity;
 import global;
 import consoled;
 
+struct Matrix {
+	float[16] fields;
+}
+
 struct Sector {
 	uint type;
-	SectorInfo_0* info0;
+	SectorInfo* info;
 	Sector* firstChild;
 	ubyte[8] unknown2;
 	Sector* nextTwin;
-	ubyte[20] unknown3;
+	Sector* previousTwin;
+	Sector* parent;
+	int unknown3;
+	Matrix* matrix;
+	ubyte[8] unknown4;
 	void* someShit;
 
 	/**
@@ -51,19 +59,24 @@ struct Sector {
 			printAddressInformation(child);
 
 			writec("Some addr: ");
-			printAddressInformation(child.info0.firstModel);
+			printAddressInformation(child.info.firstModel);
 				
 			child.printChildrenInfo(level + 1);
 		}
 	}
 }
 
-struct SectorInfo_0 {
+struct SectorInfo {
 	union {
-		Model_0_0* firstModel; // sectorInfo?
-		Entity* firstEntity;
+		Model_0_0* firstModel; // For type 32
+		//Entity1* firstEntity;
+		Sector** firstSuperObject;  // For type 4
+		RenderInfo* renderInfo; // For type 2
 	}
-	void* radiosity;
+	union {
+		void* radiosity;
+		SOStandardGameStruct* standardGameStruct;
+	}
 	void* lightType;
 	ubyte[84] unknown1;
 	ubyte* minPointInBorder;
@@ -71,6 +84,15 @@ struct SectorInfo_0 {
 	ubyte* maxPointInBorder;
 }
 
-struct Entity {
-	
+struct RenderInfo {
+	Sector* someSuperObject;
+	void* animState;
+	void* anotherState;
+	void* field_C;
+	void* dword10;
+}
+
+struct struct_v13 {
+	void* dword0;
+	SectorInfo* engineObject;
 }

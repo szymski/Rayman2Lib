@@ -43,6 +43,7 @@ class DSBScript {
 			switch(id) {
 				case 0x10:
 					r.read!uint;
+					goto default;
 				default:
 					r.read!uint;
 				break;

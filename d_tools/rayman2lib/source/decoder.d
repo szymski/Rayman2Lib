@@ -7,10 +7,10 @@ enum uint firstMagicNumber = 1790299257;
 /**
 	Decodes/encodes data with Rayman 2 algorithm.
 */
-ubyte[] decodeData(in ubyte[] data, uint magicNumber = firstMagicNumber) {
+ubyte[] decodeData(in ubyte[] data, uint magicNumber = firstMagicNumber, bool skipFirst4Bytes = true) {
 	ubyte[] decoded = data.dup;
 
-	foreach(i; 4 .. decoded.length) { // We skip first 4 bytes
+	foreach(i; skipFirst4Bytes ? 4 : 0 .. decoded.length) { // We skip first 4 bytes
 		decoded[i] = decodeByte(decoded[i], magicNumber);
 		magicNumber = getNextMagic(magicNumber);
 	}

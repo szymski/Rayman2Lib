@@ -90,11 +90,9 @@ void snarelocation(string[] args) {
 	}
 	else {
 		string bigfile = args[1];
-		uint offset = args[2].to!uint;
-		uint magic = args[3].to!uint;
 		
 		SNAFormat sna = new SNAFormat(snaFile);
-		auto pointers = sna.getRelocationDataUsingBigFile(bigfile, offset, magic);
+		auto pointers = sna.getRelocationDataUsingBigFileAuto(bigfile);
 
 		foreach(ptr; pointers)
 			writeln(ptr.address, " ", ptr.value);
@@ -108,12 +106,14 @@ void decodeall(string[] args) {
 	}
 
 	if(args.length == 0) {
-		writeln("Usage: decodeall path [wildcardfilename]");
+		writeln("Usage: decodeall path [wildcardfilename] [-allbytes]");
+		writeln("-allbytes - doesn't skip first 4 bytes");
 		return;
 	}
 
 	string path = args[0];
 	string wildcard = args.length >= 2 ? args[1] : "*.sna";
+	bool skipFirstBytes = !args.canFind("-allbytes");
 
 	foreach(entry; dirEntries(path, wildcard, SpanMode.depth)) {
 		string afterDecodeName = entry.name.dirName ~ "/" ~ entry.name.baseName ~ ".decoded";
@@ -127,7 +127,7 @@ void decodeall(string[] args) {
 		file.rawRead(data);
 		file.close();
 
-		data = decodeData(data);
+		data = decodeData(data, firstMagicNumber, skipFirstBytes);
 
 		std.file.write(afterDecodeName, data);
 	}

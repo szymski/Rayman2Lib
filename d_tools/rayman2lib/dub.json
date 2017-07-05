@@ -9,5 +9,17 @@
 	"dependencies": {
 		"consoled": "~>1.0.1",
 		"imageformats": "~>6.0.0"	
-	}
+	},
+	"configurations": [
+		{
+			"name": "default",
+			"targetType": "executable", 
+			"versions": ["exe"]
+		},
+		{
+			"name": "apilibrary",
+			"targetType": "dynamicLibrary",
+			"versions": ["dll"]
+		}
+	]
 }

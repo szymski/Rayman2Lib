@@ -140,6 +140,10 @@ class GFFormat {
 		write_png(filename, width, height, cast(ubyte[])pixels); 
 	}
 
+	void saveToTga(string filename) {
+		write_tga(filename, width, height, cast(ubyte[])pixels); 
+	}
+
 	void build() {
 		assert(width != 0, "Width isn't set.");
 		assert(height != 0, "Height isn't set.");

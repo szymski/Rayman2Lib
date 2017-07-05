@@ -108,7 +108,7 @@ void exportModel(void* address) {
 	//printAddressInformation(model_0_0.unknownPointer2);
 }
 
-void exportModel_NEW(void* address) {
+void exportModel_NEW(void* address, string path = "models") {
 	import structures.model;
 	
 	writeln("Exporting model");
@@ -118,7 +118,10 @@ void exportModel_NEW(void* address) {
 
 	// Obj model creation
 
-	if(model_0_1 is null || model_0_1.model_1_2 is null)
+	if(model_0_1 is null ||
+		model_0_1.model_1_2 is null ||
+		model_0_1.model_1_2.model_0_3 is null ||
+		model_0_1.model_1_2.model_0_3.model_0_4 is null)
 		return;
 
 	Model_0_3* model_0_3 = model_0_1.model_1_2.model_0_3;
@@ -158,8 +161,8 @@ void exportModel_NEW(void* address) {
 
 		string fileBaseName = snaLocation.name ~ "_0x" ~ address.to!string ~ "_" ~ j.to!string;
 
-		File f = File("models/" ~ fileBaseName  ~ ".obj", "w");
-		File fMtl = File("models/" ~ fileBaseName  ~ ".mtl", "w");
+		File f = File(path ~ "/" ~ fileBaseName  ~ ".obj", "w");
+		File fMtl = File(path ~ "/" ~ fileBaseName  ~ ".mtl", "w");
 
 		// Materials
 		f.writeln("mtllib ", fileBaseName, ".mtl");
@@ -192,9 +195,15 @@ void exportModel_NEW(void* address) {
 
 		// Material file
 		fMtl.writeln("newmtl default");
-		fMtl.writeln("illum 1");
+		fMtl.writeln("illum 2");
+		fMtl.writeln("Ka 1.000 1.000 1.000");
+		fMtl.writeln("Kd 1.000 1.000 1.000");
+		fMtl.writeln("Ks 0.000000 0.000000 0.000000");
+		fMtl.writeln("Ke 0.000000 0.000000 0.000000");
+		fMtl.writeln("d 1");
 //		fMtl.writeln("map_Ka textures\\", model_0_5.textureInfo_0.textureInfo_1.textureInfo_2.textureFilename.ptr.fromStringz.replace(".tga", ".gf.png"));
-		fMtl.writeln("map_Kd textures\\", model_0_5.textureInfo_0.textureInfo_1.textureInfo_2.textureFilename.to!string.replace(".tga", ".gf.png"));
+//		fMtl.writeln("map_Ka ..\\textures\\", model_0_5.textureInfo_0.textureInfo_1.textureInfo_2.textureFilename.to!string.replace(".tga", ".gf.png"));
+		fMtl.writeln("map_Kd ..\\textures\\", model_0_5.textureInfo_0.textureInfo_1.textureInfo_2.textureFilename.ptr.fromStringz.replace(".tga", ".gf.png"));
 
 		f.close();
 		fMtl.close();

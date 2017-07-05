@@ -1,7 +1,7 @@
 ﻿module formats.pointertable;
 
 import std.stdio, std.conv, consoled, core.sys.windows.windows;
-import std.file : read;
+import std.file;
 import decoder, utils, global;
 
 /**
