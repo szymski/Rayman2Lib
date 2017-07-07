@@ -28,7 +28,7 @@ PointerRelocationInfo[130240] relocationKeyValues;
 /**
 	Translates a memory pointer into SNA file relative pointer.
 */
-auto pointerToSNALocation(T)(T* pointer) {
+auto pointerToSNALocation(void* pointer) {
 	struct toReturn_t {
 		bool valid;
 		string name;
@@ -47,6 +47,13 @@ auto pointerToSNALocation(T)(T* pointer) {
 	}
 
 	return toReturn;
+}
+
+/**
+	Returns true if the address is within an SNA file.
+*/
+bool isValidSNAAddress(void* address) {
+	return pointerToSNALocation(address).valid;
 }
 
 /**

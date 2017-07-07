@@ -94,5 +94,5 @@ struct RenderInfo {
 
 struct struct_v13 {
 	void* dword0;
-	SectorInfo* engineObject;
+	Model_0_0* renderInfo;
 }

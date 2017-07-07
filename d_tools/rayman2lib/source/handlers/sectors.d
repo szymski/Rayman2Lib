@@ -22,28 +22,12 @@ void sectors(string[] args) {
 	readRelocationTableFromFile(r"D:\GOG Games\Rayman 2\Data\World\Levels\Fix.rtp");
 	FixGPT fixGpt = new FixGPT(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\Fix.gpt");
 
-	string levelName = "Learn_30";
+	string levelName = "Rhop_10";
 
 	SNAFormat levelSna = new SNAFormat(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\" ~ levelName ~ r"\" ~ levelName ~ ".sna");
 	levelSna.relocatePointersUsingBigFileAuto(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\LEVELS0.DAT");
 	readRelocationTableFromBigFileAuto(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\LEVELS0.DAT", levelName, RelocationTableType.gpt);
 	LevelGPT levelGpt = new LevelGPT(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\" ~ levelName ~ r"\" ~ levelName ~ ".gpt");
-
-
-	//exportModel_NEW(levelSna.data.ptr + 0xB02DC);
-
-
-
-
-	
-//	SNAFormat levelSna = new SNAFormat(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\Ly_10\Ly_10.sna");
-//	levelSna.relocatePointersUsingBigFile(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\LEVELS0.DAT", 0x74B5000, 0x435FA90A);
-//
-//	readRelocationTableFromBigFile(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\LEVELS0.DAT", 0x1475000, 0x431E020A);
-//	LevelGPT levelGpt = new LevelGPT(r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\Ly_10\Ly_10.gpt");
-//
-
-	//printSectorInfo(levelGpt.SECT_hFatherSector);
 
 	void process(Sector* sector, int depth = 0) {
 		string tabStr = "";
@@ -51,42 +35,33 @@ void sectors(string[] args) {
 			tabStr ~= "    ";
 
 		writeln("Type: ", sector.type);
-		//printAddressInformation(sector);
 		if(sector.type == 2) {
 			SOStandardGameStruct* gameStruct = sector.info.standardGameStruct;
 			printAddressInformation(gameStruct);
 			writeln((&gameStruct.name).fromStringz);
 
-			//if((&gameStruct.name).fromStringz == "JCP_YAM_PastilleVersLaMapMonde_I1") {
+			auto objectName = (&gameStruct.name).fromStringz.idup;
+
+			//if(objectName == "Rayman") {
 				RenderInfo* renderInfo = sector.info.renderInfo;
 
 				if(renderInfo.dword10) {
 					void* v7 = *cast(void**)(renderInfo.dword10 + 4);
 					struct_v13* v13 = cast(struct_v13*)(v7);
 				
-					if(cast(int)v13 > 1000 && v13.engineObject)
-						exportModel_NEW(v13.engineObject.firstModel);
+					if(cast(int)v13 > 1000)
+						for(; v13.renderInfo; v13 = cast(struct_v13*)(cast(int)v13 + 20)) {
+							import core.sys.windows.winbase;
+							if(isValidSNAAddress(v13.renderInfo) &&
+							   isValidSNAAddress(v13.renderInfo.model_0_1) &&
+							   cast(int)v13.renderInfo > 1000 && cast(int)v13.renderInfo.model_0_1 > 1000)
+								exportModel_NEW(v13.renderInfo, "models/" ~ objectName);
+						}
 				}
-			//}
-
-			//if(gameStruct.modelInfo) {
-			//    foreach(mdl; gameStruct.modelInfo.getModelInfos1()) {
-			//        writeln("Found object model");
-			//        exportModel_NEW(mdl.model_0_0);
-			//    }
-			//}
-
-			//if(gameStruct.field_84) {
-			//    writeln("asd");
-			//    process(cast(Sector*)gameStruct.field_84, depth++);
 			//}
 		}
 
 		if(sector.type == 4) {
-			//writeln("First super object: "); printAddressInformation(sector.info.firstSuperObject);
-
-			
-
 			for(Sector** superObject = sector.info.firstSuperObject; superObject; superObject = cast(Sector**)*(cast(int*)superObject + 1)) {
 				write(tabStr); printAddressInformation(superObject);
 

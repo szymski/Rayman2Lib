@@ -119,8 +119,8 @@ void exportModel_NEW(void* address, string path = "models") {
 	// Obj model creation
 
 	if(model_0_1 is null ||
-		model_0_1.model_1_2 is null ||
-		model_0_1.model_1_2.model_0_3 is null ||
+		model_0_1.model_1_2 is null || !isValidSNAAddress(model_0_1.model_1_2) ||
+		model_0_1.model_1_2.model_0_3 is null || !isValidSNAAddress(model_0_1.model_1_2) || !isValidSNAAddress(model_0_1.model_1_2.model_0_3) ||
 		model_0_1.model_1_2.model_0_3.model_0_4 is null)
 		return;
 
@@ -160,6 +160,8 @@ void exportModel_NEW(void* address, string path = "models") {
 		maxUVIndex++;
 
 		string fileBaseName = snaLocation.name ~ "_0x" ~ address.to!string ~ "_" ~ j.to!string;
+
+		mkdirRecurse(path);
 
 		File f = File(path ~ "/" ~ fileBaseName  ~ ".obj", "w");
 		File fMtl = File(path ~ "/" ~ fileBaseName  ~ ".mtl", "w");
