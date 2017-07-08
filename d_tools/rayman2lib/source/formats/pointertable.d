@@ -102,7 +102,7 @@ T readPointer(T = ubyte*)(MemoryReader r) {
 		auto before = result;
 		result += cast(uint)gptPointerRelocation[v1];
 
-		auto snaLocation = pointerToSNALocation(cast(void*)result);
+		auto snaLocation = pointerToSnaLocation(cast(void*)result);
 
 		if(relocationLogging) {
 			writec(Fg.lightGreen, "GPT Relocation: ", Fg.lightYellow, "Raw", Fg.white, " = 0x", before.to!string(16), Fg.lightYellow, "\t\tRelocated", Fg.white, " = 0x", cast(void*)result);
@@ -159,7 +159,7 @@ auto readPointerEx(T = ubyte*)(MemoryReader r) {
 		result += cast(uint)gptPointerRelocation[v1];
 		returnResult.value = cast(T)result;
 
-		auto snaLocation = pointerToSNALocation(cast(void*)result);
+		auto snaLocation = pointerToSnaLocation(cast(void*)result);
 		
 		if(relocationLogging) {
 			writec(Fg.lightGreen, "GPT Relocation: ", Fg.lightYellow, "Raw", Fg.white, " = 0x", before.to!string(16), Fg.lightYellow, "\t\tRelocated", Fg.white, " = 0x", cast(void*)result);

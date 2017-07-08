@@ -5,10 +5,7 @@ import formats.sna, consoled;
 
 bool logging = true;
 
-/*
-	SNA related stuff
-*/
-
+/// All loaded SNA files
 SNAFormat[] loadedSnas;
 
 /*
@@ -28,7 +25,7 @@ PointerRelocationInfo[130240] relocationKeyValues;
 /**
 	Translates a memory pointer into SNA file relative pointer.
 */
-auto pointerToSNALocation(void* pointer) {
+auto pointerToSnaLocation(void* pointer) {
 	struct toReturn_t {
 		bool valid;
 		string name;
@@ -52,15 +49,16 @@ auto pointerToSNALocation(void* pointer) {
 /**
 	Returns true if the address is within an SNA file.
 */
-bool isValidSNAAddress(void* address) {
-	return pointerToSNALocation(address).valid;
+bool isValidSnaAddress(void* address) {
+	return pointerToSnaLocation(address).valid;
 }
 
 /**
-	Print address information
+	Print in which file and under which address the object
+	under the specified address is located.
 */
 auto printAddressInformation(void* address) {
-	auto snaLocation = pointerToSNALocation(address);
+	auto snaLocation = pointerToSnaLocation(address);
 
 	if(snaLocation.valid)
 		writecln(Fg.cyan, "\t", snaLocation.name, ": ", Fg.white, "0x", snaLocation.address.to!string(16));
@@ -70,6 +68,7 @@ auto printAddressInformation(void* address) {
 
 /**
 	Index of the level in this table is the index of relocation table used by the level.
+	This list of levels is available in each SNA file.
 */
 string[] levelList = [
 	"Menu", "Jail_10", "Jail_20", "Mapmonde", "Learn_10", "Learn_30", "Bonux", "Learn_31",

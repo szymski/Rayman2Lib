@@ -1,7 +1,7 @@
 ﻿module api;
 
 import std.stdio, std.file, std.path, std.algorithm, std.traits, std.array, std.conv, std.string, consoled, imageformats;
-import app, decoder, formats.pointertable, formats.relocationtable, formats.sna, formats.cnt, formats.gf, global, utils, structures.sector, formats.gpt, structures.model;
+import app, decoder, formats.pointertable, formats.relocationtable, formats.sna, formats.cnt, formats.gf, global, utils, structures.superobject, formats.gpt, structures.model;
 import core.sys.windows.windows, core.sys.windows.wtypes;
 import core.stdc.stdlib : free;
 import core.memory : GC;
@@ -89,7 +89,7 @@ export Api_MeshExportInfo* getLevelMesh(char* filename, ref BSTR obj) {
 	return null;
 }
 
-Api_MeshExportInfo* exportMesh(Sector* sector) {
+Api_MeshExportInfo* exportMesh(SuperObject* sector) {
 	Api_MeshExport[] meshes;
 
 	void exportModel(Model_0_0* model_0_0) {
@@ -159,7 +159,7 @@ Api_MeshExportInfo* exportMesh(Sector* sector) {
 		meshExport.subMeshes = subMeshes.ptr;
 	}
 
-	void exportAllModels(Sector* sector) {
+	void exportAllModels(SuperObject* sector) {
 		foreach(currSector; sector.getTwins()) {
 			if(currSector.info0) {
 				if(currSector.type == 32 || currSector.type == 8 || currSector.type == 4) {

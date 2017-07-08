@@ -1,7 +1,7 @@
 ﻿module formats.datfile;
 
 import std.stdio, std.file, std.path, std.algorithm, std.traits, std.array, std.conv, std.string, consoled, imageformats, std.math;
-import app, decoder, formats.pointertable, formats.relocationtable, formats.sna, formats.cnt, formats.gf, global, utils, structures.sector;
+import app, decoder, formats.pointertable, formats.relocationtable, formats.sna, formats.cnt, formats.gf, global, utils, structures.superobject;
 
 struct DATHeader {
 	int field_0;
@@ -48,16 +48,7 @@ uint getOffsetInBigFile(File f, ref uint tableToLoad) {
 	int levels0DatValue_5 = header.field_4 ^ (number - header.field_0);
 	header.field_0 += header.field_8;
 	header.field_4 += header.field_C;
-	
-//	printStruct(header);
-//	
-//	writeln(levels0DatValue_0.to!string(16));
-//	writeln(levels0DatValue_1.to!string(16));
-//	writeln(levels0DatValue_2.to!string(16));
-//	writeln(levels0DatValue_3.to!string(16));
-//	writeln(levels0DatValue_4.to!string(16));
-//	writeln(levels0DatValue_5.to!string(16));
-//	
+
 	// Get offset with sinus header - SNA_fn_hGetOffSetInBigFileWithSinusHeader
 	
 	SplitInt SNA_g_ucNextRelocationTableToLoad;
@@ -148,6 +139,4 @@ uint getMagicForTable(uint tableToLoad) {
 	SNA_g_ucNextRelocationTableToLoad.byte3 = ~SNA_g_ucNextRelocationTableToLoad.byte2;
 
 	return getNextMagic(SNA_g_ucNextRelocationTableToLoad);
-
-	//return cast(uint)(16807 * (cast(uint)SNA_g_ucNextRelocationTableToLoad ^ 0x75BD924) - 0x7FFFFFFF * ((SNA_g_ucNextRelocationTableToLoad ^ 0x75BD924) / 0x1F31D));
 }

@@ -1,6 +1,6 @@
 ﻿module formats.gpt;
 
-import formats.pointertable, structures.sector;
+import formats.pointertable, structures.superobject;
 import std.stdio;
 
 private abstract class GPTFormat {
@@ -91,10 +91,10 @@ class FixGPT : GPTFormat {
 	Represents level GPT file.
 */
 class LevelGPT : GPTFormat {
-	Sector* gp_stActualWorld;
-	Sector* gp_stDynamicWorld;
-	Sector* gp_stInactiveDynamicWorld;
-	Sector* SECT_hFatherSector;
+	SuperObject* gp_stActualWorld;
+	SuperObject* gp_stDynamicWorld;
+	SuperObject* gp_stInactiveDynamicWorld;
+	SuperObject* SECT_hFatherSector;
 	ubyte* gs_hFirstSubMapPosition;
 	ubyte*[] g_stAlways;
 	ubyte* dword_4A6B1C;
@@ -148,33 +148,17 @@ class LevelGPT : GPTFormat {
 		// TODO: Fix table reading and remove skip
 		pt.readPointerBlock(600);
 		
-		//	foreach(i; 0 .. pointerCount) {
-		//		writeln("Reading table");
-		//		v23 = levelGpt.readPointer!(uint**);
-		//		//printMemory(&v23[1][3], 512);
-		//		
-		//		if(cast(uint)v23 != 0 && v23[1][3]) {
-		//			v24 = levelGpt.readPointer!(ubyte*);
-		//			
-		//			levelGpt.readPointerBlock(0x58);
-		//			levelGpt.readPointer!(ubyte*);
-		//			levelGpt.readPointerBlock(0x4);
-		//			levelGpt.readPointer!(ubyte*);
-		//			levelGpt.readPointer!(ubyte*);
-		//			levelGpt.readPointer!(ubyte*);
-		//		}
-		//		writeln("End reading table");
-		//	}
+		// Here some array is read, but I couldn't manage to replicate the code
 
 		assert(pt.r.position == 604, "Invalid exit position. Table reading inproper.");
 		
 		writeln("Ended reading table");
 		
-		gp_stActualWorld = pt.readPointer!(Sector*);
-		gp_stDynamicWorld = pt.readPointer!(Sector*);
-		gp_stInactiveDynamicWorld = pt.readPointer!(Sector*);
+		gp_stActualWorld = pt.readPointer!(SuperObject*);
+		gp_stDynamicWorld = pt.readPointer!(SuperObject*);
+		gp_stInactiveDynamicWorld = pt.readPointer!(SuperObject*);
 		writeln("SECT_hFatherSector");
-		SECT_hFatherSector = pt.readPointer!(Sector*);
+		SECT_hFatherSector = pt.readPointer!(SuperObject*);
 		gs_hFirstSubMapPosition = pt.readPointer!(ubyte*);
 		g_stAlways = pt.readPointerBlock(0x1C);
 		dword_4A6B1C = pt.readPointer!(ubyte*);

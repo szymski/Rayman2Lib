@@ -1,13 +1,13 @@
-﻿module structures.entity;
+﻿module structures.gamestruct;
 
-import structures.model, structures.sector;
+import structures.model, structures.superobject;
 
 struct SOStandardGameStruct
 {
 	int field_0;
 	int field_4;
 	int field_8;
-	Sector* parentSuperObject;
+	SuperObject* parentSuperObject;
 	int field_10;
 	int field_14;
 	int field_18;
@@ -88,28 +88,4 @@ struct SOStandardGameStruct
 	int field_144;
 	int field_148;
 	int field_14C;
-}
-
-struct ModelInfo_0 {
-	void* self;
-	ModelInfo_1* firstModelInfo1;
-	uint unknown;
-	uint modelCount;
-
-	ModelInfo_1*[] getModelInfos1() {
-		ModelInfo_1*[] models;
-
-		foreach(i; 0 .. modelCount)
-			models ~= firstModelInfo1 + i;
-
-		return models;
-	}
-}
-
-struct ModelInfo_1 {
-	uint unknown1;
-	Model_0_0* model_0_0;
-	uint unknown2;
-	uint type;
-	uint unknown4;
 }

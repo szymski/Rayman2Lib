@@ -137,7 +137,7 @@ class SNAFormat
 				// TODO: Debug info, remove later
 				import core.sys.windows.windows;
 				
-				auto snaLocation = pointerToSNALocation(cast(void*)*rawAddress);
+				auto snaLocation = pointerToSnaLocation(cast(void*)*rawAddress);
 				
 //				file.write("0x", (cast(uint)rawAddress - cast(uint)data.ptr).to!string(16), ";");
 //				file.write("0x", before.to!string(16), ";");
@@ -203,7 +203,7 @@ class SNAFormat
 				uint* rawAddress = cast(uint*)(relocValue.dword0 + gptPointerRelocation[10 * part.id + part.block]);
 				uint before = cast(uint)*rawAddress;
 				
-				auto snaLocation = pointerToSNALocation(cast(void*)(*rawAddress + gptPointerRelocation[10 * relocValue.byte4 + relocValue.byte5]));
+				auto snaLocation = pointerToSnaLocation(cast(void*)(*rawAddress + gptPointerRelocation[10 * relocValue.byte4 + relocValue.byte5]));
 
 				if(snaLocation.valid)
 					pointers ~= Pointer(cast(uint)rawAddress - cast(uint)data.ptr, snaLocation.address);

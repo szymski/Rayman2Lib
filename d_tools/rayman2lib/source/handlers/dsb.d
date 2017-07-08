@@ -1,7 +1,7 @@
 ﻿module handlers.dsb;
 
 import std.stdio, std.file, std.path, std.algorithm, std.traits, std.array, std.conv, std.string, consoled, imageformats;
-import app, decoder, formats.pointertable, formats.relocationtable, formats.sna, formats.cnt, formats.gf, formats.gpt, structures.model, global, utils, structures.sector, formats.dsb;
+import app, decoder, formats.pointertable, formats.relocationtable, formats.sna, formats.cnt, formats.gf, formats.gpt, structures.model, global, utils, structures.superobject, formats.dsb;
 
 mixin registerHandlers;
 

@@ -1,12 +1,8 @@
-import std.stdio, std.file, std.path, std.algorithm, std.traits, std.array, std.conv, std.string;
-import decoder, formats.pointertable, formats.relocationtable, formats.sna, formats.cnt, formats.gf, global, utils, structures.sector;
-import consoled, imageformats;
+import std.stdio;
 
 version(exe) void main(string[] args)
 {
-	debug {
-		args ~= "sectors";
-	}
+	debug args ~= "superobjects"; // Use this to run a handler in debug mode
 
 	// Print usage instruction, if no parameter given
 	if(args.length <= 1) {
@@ -30,12 +26,12 @@ version(exe) void main(string[] args)
 	Handler registering.
 */
 
-struct handler;
+enum handler;
 
 void function(string[])[string] handlers;
 
 /**
-	Registers functions with @handler attribute, so they can be ran by a command.
+	Registers functions with @handler attribute, so they can be run by a command.
 */
 mixin template registerHandlers(string moduleName = __MODULE__) {
 	static this() {

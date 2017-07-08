@@ -6,10 +6,13 @@ import std.path : baseName;
 import utils, global;
 import imageformats;
 
-enum GFType { rayman2, rayman2ios, rayman3 };
+enum GFType {
+	rayman2,
+	rayman2ios,
+	rayman3,
+};
 
 class GFFormat {
-
 	string name = "Unknown";
 	ubyte[] data;
 	MemoryReader reader;
