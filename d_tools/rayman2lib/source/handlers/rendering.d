@@ -94,6 +94,8 @@ void graphics(string[] args) {
 	bool drawObjectCubes = true;
 	bool useGameCamera = false;
 
+	SuperObject* selectedObject;
+
 	void drawModel(Model_0_0* model) {
 		Model_0_1* model_0_1 = model.model_0_1;
 
@@ -143,6 +145,9 @@ void graphics(string[] args) {
 				auto rnd = Random(cast(uint)superObject);
 				glColor3f(uniform(0f, 1f, rnd), uniform(0f, 1f, rnd), uniform(0f, 1f, rnd));
 
+				if(selectedObject == superObject)
+					glColor3f(0f, 0.2f, 1f);
+
 				glDisable(GL_TEXTURE_2D);
 				glPushMatrix();
 				glMultMatrixf(superObject.matrix.toMat4f.transposed.ptr);
@@ -173,6 +178,7 @@ void graphics(string[] args) {
 				superObject.info.firstModel.model_0_1 && superObject.info.firstModel.model_0_1.model_1_2 &&
 				superObject.info.firstModel.model_0_1.model_1_2.model_0_3) {
 				try {
+					//printAddressInformation(superObject.info.firstModel.model_0_1.model_1_2.model_0_3);
 					drawModel(superObject.info.firstModel);
 				}
 				catch(Throwable e) { }
@@ -184,7 +190,7 @@ void graphics(string[] args) {
 			try {
 				//writecln("Matrix type: ", *cast(int*)&superObject.matrix.fields[0]);
 				glMultMatrixf(superObject.matrix.toMat4f.transposed.ptr);
-				drawModel(cast(Model_0_0*)superObject.info);
+				drawModel(superObject.firstModel);
 			}
 			catch(Throwable e) { }
 			glPopMatrix();
@@ -235,6 +241,8 @@ void graphics(string[] args) {
 	};
 
 	void drawNames(SuperObject* superObject) {
+		auto io = igGetIO();
+
 		if(superObject.type == 2) {
 			SOStandardGameStruct* gameStruct = superObject.info.standardGameStruct;
 
@@ -262,14 +270,23 @@ void graphics(string[] args) {
 				auto onScreen = ((m * gfm.math.matrix.Matrix!(float, 4, 1).fromColumns([objPos]))
 					.column(0) - vec4f(0.5f, 0.5f, 0, 0)) * vec4f(platform._width / 2f, platform._height / 2f, 1, 0);
 
+				auto fixedOnScreen = vec2f(platform._width / 2f - onScreen.x / onScreen.z / platform._aspectRatio, platform._height / 2f + onScreen.y / onScreen.z);
+
 				if(drawObjectNames) {
 					if(onScreen.z < 0) {
 						ImVec2 textSize;
 						igCalcTextSize(&textSize, name.toStringz);
 						ImDrawList_AddText(igGetWindowDrawList(), ImVec2(platform._width / 2f - onScreen.x / onScreen.z / platform._aspectRatio - textSize.x / 2f, platform._height / 2f + onScreen.y / onScreen.z - textSize.y / 2f), 0xFFFFFFFF, name.toStringz);
 
-						//if((platform.cameraPosition - objPos.xyz).length() < 15f)
-						//	ImDrawList_AddCircle(igGetWindowDrawList(), ImVec2(platform._width / 2f - onScreen.x / onScreen.z / platform._aspectRatio, platform._height / 2f + onScreen.y / onScreen.z), 150f / onScreen.z, 0xffffffff, 16);
+						if(io.MouseClicked[0]) {
+							vec2f mousePos = vec2f(io.MousePos.x, io.MousePos.y);
+							if((mousePos - fixedOnScreen).length < abs(150f / onScreen.z)) {
+								selectedObject = superObject;
+							}
+						}
+
+						if((platform.cameraPosition - objPos.xyz).length < 15f)
+							ImDrawList_AddCircle(igGetWindowDrawList(), ImVec2(platform._width / 2f - onScreen.x / onScreen.z / platform._aspectRatio, platform._height / 2f + onScreen.y / onScreen.z), 150f / onScreen.z, 0xffffffff, 16);
 					}
 				}
 			}
@@ -309,16 +326,37 @@ void graphics(string[] args) {
 		igCheckbox("Use game camera", &useGameCamera);
 		igEnd();
 
-		igBegin("Levels");
-		foreach(name; levelList)
-			if(igButton(name.toStringz))
-				(cast(void function(const(char)*, bool))0x4054D0)(name.toStringz, false);
-		igEnd();
+		version(dll) {
+			igBegin("Levels");
+			foreach(name; levelList)
+				if(igButton(name.toStringz))
+					(cast(void function(const(char)*, bool))0x4054D0)(name.toStringz, false);
+			igEnd();
+		}
+
+		if(selectedObject && selectedObject.type <= 64) {
+			igBegin("Selected object");
+			if(selectedObject.info.hasDynamics) {
+				auto dynamics = (*selectedObject.info.dynamics);
+				igInputFloat3("Position", *cast(float[3]*)&dynamics.position);
+				igInputFloat3("Position (matrix)", *cast(float[3]*)&selectedObject.matrix.fields[1]);
+				igInputFloat3("Scale", *cast(float[3]*)&dynamics.scale);
+
+				//igInputFloat("Speed", &dynamics.speedVector);
+			}
+			else
+				igInputFloat3("Position", *cast(float[3]*)&selectedObject.matrix.fields[1]);
+			igCheckbox("Is camera", (cast(bool*)&selectedObject.info.isCamera + 3));
+			igEnd();
+		}
 
 		if(io.MouseDown[1]) {
 			auto keyboardState = SDL_GetKeyboardState(null);
 
-			enum speed = 50f;
+			float speed = 50f;
+
+			if(keyboardState[SDL_SCANCODE_LSHIFT])
+				speed *= 10f;
 
 			if(keyboardState[SDL_SCANCODE_W]) platform.cameraPosition += (cast(mat4f)platform.cameraRotation * mat4f.translation(vec3f(0, 1f, 0))).column(3).xyz * dt * speed;
 			if(keyboardState[SDL_SCANCODE_S]) platform.cameraPosition += (cast(mat4f)platform.cameraRotation * mat4f.translation(vec3f(0, -1f, 0))).column(3).xyz * dt * speed;

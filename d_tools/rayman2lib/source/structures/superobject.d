@@ -74,11 +74,20 @@ struct SectorInfo {
 		void* radiosity; // For type 32
 		SOStandardGameStruct* standardGameStruct;
 	}
-	void* lightType;
-	ubyte[84] unknown1;
+	union {
+		void* lightType;
+		DNM_stDynamics** dynamics; // For type 4
+	}
+	void* aiPointer;
+	int isCamera;
+	ubyte[76] unknown1;
 	ubyte* minPointInBorder;
 	ubyte[8] unknown2;
 	ubyte* maxPointInBorder;
+
+	bool hasDynamics() {
+		return dynamics != null && *dynamics != null;
+	}
 }
 
 struct RenderInfo {
@@ -92,4 +101,28 @@ struct RenderInfo {
 struct struct_v13 {
 	void* dword0;
 	Model_0_0* renderInfo;
+}
+
+struct DNM_stDynamics {
+	ubyte field_0;
+	ubyte field_1;
+	ubyte field_2;
+	ubyte field_3;
+	int idcard;
+	int stateOrUsedMechanics;
+	int dwordC;
+	ubyte gap10[44];
+	float float3C;
+	float float40;
+	float *pfloat44;
+	float[3] scale;
+	float speedVector;
+	float float58;
+	float float5C;
+	ubyte gap60[12];
+	float float6C;
+	float float70;
+	float float74;
+	float[3] *vector_B;
+	float[3] *position;
 }
