@@ -3,7 +3,11 @@
 	"versions": {
 		"consoled": "1.0.4",
 		"derelict-gl3": "1.0.18",
+		"derelict-il": "2.0.0-beta.1",
+		"derelict-imgui": "0.9.4",
+		"derelict-sdl2": "2.0.2",
 		"derelict-util": "2.0.6",
+		"gfm": "6.2.10",
 		"imaged": "1.0.1",
 		"imageformats": "6.0.1"
 	}

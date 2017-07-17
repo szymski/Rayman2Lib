@@ -3,14 +3,27 @@
 import structures.model, structures.gamestruct;
 import global;
 import consoled;
+import gfm.math.matrix;
+import gfm.math.vector;
 
 struct Matrix {
 	float[16] fields;
+	mat4f toMat4f() {
+		return mat4f.fromRows([
+				vec4f(fields[4], fields[7], fields[10], fields[1]),
+				vec4f(fields[5], fields[8], fields[11], fields[2]),
+				vec4f(fields[6], fields[9], fields[12], fields[3]),
+				vec4f(0, 0, 0, 1),
+			]);
+	}
 }
 
 struct SuperObject {
 	uint type;
-	SectorInfo* info;
+	union {
+		SectorInfo* info;
+		Model_0_0* firstModel; // For type 8
+	}
 	SuperObject* firstChild;
 	ubyte[8] unknown2;
 	SuperObject* nextTwin;

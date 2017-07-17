@@ -6,7 +6,7 @@ import core.sys.windows.windows, core.sys.windows.wtypes;
 import core.stdc.stdlib : free;
 import core.memory : GC;
 
-version(dll):
+version(none):
 
 __gshared {
 	string levels0datPath;

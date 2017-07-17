@@ -2,7 +2,7 @@ import std.stdio;
 
 version(exe) void main(string[] args)
 {
-	debug args ~= "superobjects"; // Use this to run a handler in debug mode
+	debug args ~= "graphics"; // Use this to run a handler in debug mode
 
 	// Print usage instruction, if no parameter given
 	if(args.length <= 1) {
@@ -15,12 +15,29 @@ version(exe) void main(string[] args)
 		return;
 	}
 
-	// Handle the given option
-	if(auto handleFunc = args[1] in handlers)
-		(*handleFunc)(args[2 .. $]);
-	else
-		writeln("No such option");
+	// Make segmentation faults throw
+	import core.stdc.signal;
+	alias signalfn = extern(C) void function(int) nothrow @nogc @system;
+	signal(SIGSEGV, cast(signalfn)&signalHandler);
+
+	try {
+		// Handle the given option
+		if(auto handleFunc = args[1] in handlers)
+			(*handleFunc)(args[2 .. $]);
+		else
+			writeln("No such option");
+	}
+	catch(Throwable e) {
+		writeln(e.msg);
+	}
 }
+
+version(exe)
+	extern(C)
+	@system void signalHandler(int signal) {
+		throw new Exception("Access violation");
+	}
+
 
 /*
 	Handler registering.
@@ -35,7 +52,7 @@ void function(string[])[string] handlers;
 */
 mixin template registerHandlers(string moduleName = __MODULE__) {
 	static this() {
-		static import std.traits;
+		import std.traits;
 
 		mixin("import thisModule = " ~ moduleName ~ ";");
 

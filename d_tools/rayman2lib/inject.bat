@@ -1,0 +1,1 @@
+mini_injector "Rayman II" rayman2lib.dll -w

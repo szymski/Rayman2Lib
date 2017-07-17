@@ -8,7 +8,12 @@
 	"license": "MIT",
 	"dependencies": {
 		"consoled": "~>1.0.1",
-		"imageformats": "~>6.0.0"	
+		"imageformats": "~>6.0.0",
+		"derelict-sdl2": "~>2.0.0",
+		"derelict-gl3": "~>1.0.18",
+		"derelict-il": "~>2.0.0-beta.1",
+		"gfm:math": "~>6.0",
+		"derelict-imgui": "~>0.9.4",
 	},
 	"configurations": [
 		{
@@ -19,7 +24,19 @@
 		{
 			"name": "apilibrary",
 			"targetType": "dynamicLibrary",
-			"versions": ["dll"]
+			"versions": ["dll"] 
+		},
+		{
+			"name": "injecteddll",
+			"targetType": "dynamicLibrary",
+			"versions": ["dll"] ,
+			"postBuildCommands": [
+				"inject.bat"
+			],
+			"dflags": [
+				"-g",
+				"-gc"
+			]
 		}
 	]
 }
