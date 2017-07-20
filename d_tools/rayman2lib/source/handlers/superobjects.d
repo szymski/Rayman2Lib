@@ -20,7 +20,7 @@ void superobjects(string[] args) {
 	readRelocationTableFromFile(levelsDir ~ "Fix.rtp");
 	FixGPT fixGpt = new FixGPT(levelsDir ~ "Fix.gpt");
 
-	enum levelName = "Rhop_10";
+	enum levelName = "Chase_10";
 
 	SNAFormat levelSna = new SNAFormat(levelsDir ~ levelName ~ r"\" ~ levelName ~ ".sna");
 	levelSna.relocatePointersUsingBigFileAuto(levelsDir ~ "LEVELS0.DAT");
@@ -79,7 +79,44 @@ void superobjects(string[] args) {
 			process(superObject.nextTwin);
 	}
 
-	process(levelGpt.SECT_hFatherSector);
+	//process(levelGpt.SECT_hFatherSector);
+
+
+
+
+
+
+
+
+	SectorInfo* info = cast(SectorInfo*)(levelSna.data.ptr + 0x4DC1);
+	
+	RenderInfo* renderInfo = info.renderInfo;
+	
+	if(renderInfo.dword10) {
+		void* v7 = *cast(void**)(renderInfo.dword10 + 4);
+		struct_v13* v13 = cast(struct_v13*)(v7);
+		
+		if(cast(int)v13 > 1000)
+		for(; v13.renderInfo; v13 = cast(struct_v13*)(cast(int)v13 + 20)) {
+			// Unfortunately, a lot of validity testing is required
+			if(isValidSnaAddress(v13.renderInfo) &&
+				isValidSnaAddress(v13.renderInfo.model_0_1) &&
+				cast(int)v13.renderInfo > 1000 && cast(int)v13.renderInfo.model_0_1 > 1000)
+				exportModel(v13.renderInfo, "models/obus");
+		}
+	}
+
+
+
+
+
+
+
+
+
+
+
+
 
 	readln();
 }

@@ -13,8 +13,8 @@ struct SOStandardGameStruct
 	int field_18;
 	int field_1C;
 	int field_20;
-	int field_24;
-	int field_28;
+	int customBits;
+	int moreCustomBits;
 	int field_2C;
 	int field_30;
 	int field_34;

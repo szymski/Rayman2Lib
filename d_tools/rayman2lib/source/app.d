@@ -2,7 +2,7 @@ import std.stdio;
 
 version(exe) void main(string[] args)
 {
-	debug args ~= "graphics"; // Use this to run a handler in debug mode
+	debug args ~= "levelviewer"; // Use this to run a handler in debug mode
 
 	// Print usage instruction, if no parameter given
 	if(args.length <= 1) {

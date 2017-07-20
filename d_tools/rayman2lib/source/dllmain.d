@@ -6,6 +6,12 @@ import core.runtime, core.thread;
 import std.stdio;
 import std.string;
 import core.sys.windows.windows;
+import core.sys.windows.winnt;
+import core.sys.windows.dbghelp;
+import core.stdc.signal;
+import detours;
+
+pragma(lib, "detours");
 
 HINSTANCE g_hInst;
 
@@ -24,8 +30,15 @@ extern (Windows) BOOL DllMain(HINSTANCE hInstance, ULONG ulReason, LPVOID pvRese
 		case DLL_PROCESS_ATTACH:
 			Runtime.initialize();
 
-			writeln("Dll injected");
 			currentModule = hInstance;
+
+			AllocConsole();
+			stdout.windowsHandleOpen(GetStdHandle(STD_OUTPUT_HANDLE), "w");
+			stderr.windowsHandleOpen(GetStdHandle(STD_ERROR_HANDLE), "w");
+
+			writeln("Dll injected");
+
+			detourFunctions();
 
 			try {
 				new Thread({
@@ -59,12 +72,6 @@ extern(C)
 }
 
 void onAttach() {
-	AllocConsole();
-	stdout.windowsHandleOpen(GetStdHandle(STD_OUTPUT_HANDLE), "w");
-	stderr.windowsHandleOpen(GetStdHandle(STD_ERROR_HANDLE), "w");
-
-	import core.stdc.signal;
-
 	alias signalfn = extern(C) void function(int) nothrow @nogc @system;
 
 	signal(SIGSEGV, cast(signalfn)&signalHandler);
@@ -73,10 +80,10 @@ void onAttach() {
 //	Thread.sleep(msecs(15000)); 
 //	writeln("Resuming");
 
-	import handlers.rendering;
+	import handlers.levelviewer;
 
 	try {
-		graphics([]);
+		levelviewer([]);
 	}
 	catch(Throwable e) {
 		writeln("Got exception");
@@ -89,4 +96,38 @@ void onAttach() {
 	Runtime.unloadLibrary(currentModule);
 	Runtime.terminate();
 	FreeLibrary(currentModule);
+}
+
+__gshared extern(C):
+
+auto DrawFrame = cast(char function())0x401160;
+
+void detourFunctions() {
+	writeln("Detouring functions...");
+
+	DetourRestoreAfterWith();
+	DetourTransactionBegin();
+	DetourUpdateThread(GetCurrentThread());
+	
+	DetourAttach(&DrawFrame, &NEW_DrawFrame);
+	
+	DetourTransactionCommit();
+
+	writeln("Functions detoured");
+}
+
+bool canUpdateEngine = true;
+bool engineUpdating = false;
+bool engineUpdated = false;
+
+char NEW_DrawFrame() {
+	if(!canUpdateEngine)
+		return 0;
+
+	engineUpdating = true;
+	auto result = DrawFrame();
+	engineUpdating = false;
+	canUpdateEngine = false;
+
+	return result;
 }

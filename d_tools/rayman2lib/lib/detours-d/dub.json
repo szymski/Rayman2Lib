@@ -1,0 +1,10 @@
+{
+	"name": "detours-d",
+	"targetType": "library",
+	"authors": [
+		"Szymon Jankowski"
+	],
+	"description": "D bindings for Microsoft Detours Express 3.0.",
+	"copyright": "Copyright © 2016, Szymon Jankowski",
+	"license": "Boost"
+}

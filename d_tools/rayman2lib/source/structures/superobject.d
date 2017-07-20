@@ -64,6 +64,7 @@ struct SuperObject {
 	}
 }
 
+// EngineObject
 struct SectorInfo {
 	union {
 		Model_0_0* firstModel; // For type 32

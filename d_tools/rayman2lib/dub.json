@@ -14,7 +14,11 @@
 		"derelict-il": "~>2.0.0-beta.1",
 		"gfm:math": "~>6.0",
 		"derelict-imgui": "~>0.9.4",
+		"rayman2lib:detours-d": "*"
 	},
+	"subPackages": [ 
+		"./lib/detours-d/"
+	],
 	"configurations": [
 		{
 			"name": "default",
