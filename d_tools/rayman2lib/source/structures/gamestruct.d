@@ -88,4 +88,9 @@ struct SOStandardGameStruct
 	int field_144;
 	int field_148;
 	int field_14C;
+
+	string strName() {
+		import std.string : fromStringz;
+		return (&name).fromStringz.idup;
+	}
 }

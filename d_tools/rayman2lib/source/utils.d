@@ -35,6 +35,14 @@ class MemoryReader {
 		}
 	}
 
+	T[] readArray(T)(int length) {
+		T[] arr;
+		arr.length = length;
+		(cast(ubyte*)arr.ptr)[0 .. length * T.sizeof] = data[position .. position + length * T.sizeof];
+		position += length * T.sizeof;
+		return arr;
+	}
+
 	bool eof() {
 		return position >= data.length;
 	}

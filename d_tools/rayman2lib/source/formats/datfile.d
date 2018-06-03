@@ -10,7 +10,7 @@ struct DATHeader {
 	int field_C;
 }
 
-uint getOffsetInBigFile(File f, ref uint tableToLoad) {
+uint getOffsetInBigFile(File f, uint tableToLoad) {
 	f.seek(0);
 
 	DATHeader header = f.readType!DATHeader;

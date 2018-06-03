@@ -9,6 +9,7 @@ import global, formats.relocationtable, formats.sna, formats.gpt, structures.mod
 import std.random, std.string, std.conv;
 import handlers.renderingplatform;
 import core.sys.windows.windows;
+import dllmain;
 
 mixin registerHandlers;
 
@@ -29,7 +30,7 @@ void levelviewer(string[] args) {
 	// Prepare files for PC version
 
 	version(exe) {
-		enum levelsDir = r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\";
+		enum levelsDir = r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\\";
 
 		SNAFormat sna = new SNAFormat(levelsDir ~ "Fix.sna");
 		sna.relocatePointersUsingFile(levelsDir ~ "Fix.rtb");
@@ -39,11 +40,49 @@ void levelviewer(string[] args) {
 		 
 		enum levelName = "Learn_30";
 		
-		SNAFormat levelSna = new SNAFormat(levelsDir ~ levelName ~ r"\" ~ levelName ~ ".sna");
+		SNAFormat levelSna = new SNAFormat(levelsDir ~ levelName ~ r"\\" ~ levelName ~ ".sna");
 		levelSna.relocatePointersUsingBigFileAuto(levelsDir ~ "LEVELS0.DAT");
 		readRelocationTableFromBigFileAuto(levelsDir ~ "LEVELS0.DAT", levelName, RelocationTableType.gpt);
-		LevelGPT levelGpt = new LevelGPT(levelsDir ~ levelName ~ r"\" ~ levelName ~ ".gpt");
+		LevelGPT levelGpt = new LevelGPT(levelsDir ~ levelName ~ r"\\" ~ levelName ~ ".gpt");
 	}
+
+	// Prepare files for demo version
+	
+//	version(exe) {
+//		enum levelsDir = r"D:\GOG Games\Rayman 2 Early Demo\BinData\World\Levels\";
+//		
+//		SNAFormat sna = new SNAFormat(levelsDir ~ "Fix.sna");
+//		sna.relocatePointersUsingFile(levelsDir ~ "Fix.rtb");
+//		
+//		readRelocationTableFromFile(levelsDir ~ "Fix.rtp");
+//		FixGPT fixGpt = new FixGPT(levelsDir ~ "Fix.gpt");
+//		
+//		enum levelName = "Bast_22";
+//		
+//		SNAFormat levelSna = new SNAFormat(levelsDir ~ levelName ~ r"\" ~ levelName ~ ".sna");
+//		levelSna.relocatePointersUsingFile(levelsDir ~ levelName ~ r"\" ~ levelName ~ ".rtb");
+//		readRelocationTableFromFile(levelsDir ~ levelName ~ r"\" ~ levelName ~ ".rtp");
+//		LevelGPT levelGpt = new LevelGPT(levelsDir ~ levelName ~ r"\" ~ levelName ~ ".gpt");
+//	}
+
+	// Prepare files for iOS version
+	
+//	version(exe) {
+//		enum levelsDir = r"E:\Desktop\Rayman Stuff\Rayman2.app\DATA\WORLD\LEVELS\";
+//		
+//		SNAFormat sna = new SNAFormat(levelsDir ~ "Fix.sna");
+//		sna.relocatePointersUsingFile(levelsDir ~ "Fix.rtb");
+//		
+//		readRelocationTableFromFile(levelsDir ~ "Fix.rtp");
+//		FixGPT fixGpt = new FixGPT(levelsDir ~ "Fix.gpt");
+//		
+//		enum levelName = "BALL";
+//		
+//		SNAFormat levelSna = new SNAFormat(levelsDir ~ levelName ~ r"\" ~ levelName ~ ".sna");
+//		levelSna.relocatePointersUsingFile(levelsDir ~ levelName ~ r"\" ~ levelName ~ ".rtb");
+//		readRelocationTableFromFile(levelsDir ~ levelName ~ r"\" ~ levelName ~ ".rtp");
+//		LevelGPT levelGpt = new LevelGPT(levelsDir ~ levelName ~ r"\" ~ levelName ~ ".gpt");
+//	}
 
 	// Create a renderer window
 
@@ -56,6 +95,7 @@ void levelviewer(string[] args) {
 
 	bool drawObjectNames = true;
 	bool drawObjectCubes = true;
+	bool drawUnspawnedObjects = false;
 	bool useGameCamera = false;
 
 	SuperObject* selectedObject;
@@ -99,11 +139,87 @@ void levelviewer(string[] args) {
 		}
 	}
 
+	void drawNames(SuperObject* superObject) {
+		auto io = igGetIO();
+		
+		if(superObject.type == 2) {
+			SOStandardGameStruct* gameStruct = superObject.engineObject.standardGameStruct;
+			
+			string name;
+			try {
+				name = (&gameStruct.name).fromStringz.idup;
+			}
+			catch(Throwable e) {
+				writecln("Error getting standard game struct name");
+			}
+			
+			if(useGameCamera && name == "StdCamer") {
+				vec4f objPos = superObject.matrix.toMat4f.column(3);
+				platform.cameraPosition = objPos.xyz;
+				platform.cameraMatrix = superObject.matrix.toMat4f * mat4f.rotateZ(PI);
+			}
+			
+			try {
+				mat4f m = mat4f();
+				glGetFloatv(GL_MODELVIEW_MATRIX, m.ptr);
+				m = m.transposed;
+				
+				vec4f objPos = superObject.matrix.toMat4f.column(3);
+				
+				auto onScreen = ((m * gfm.math.matrix.Matrix!(float, 4, 1).fromColumns([objPos]))
+					.column(0) - vec4f(0.5f, 0.5f, 0, 0)) * vec4f(platform.width / 2f, platform.height / 2f, 1, 0);
+				
+				auto fixedOnScreen = vec2f(platform.width / 2f - onScreen.x / onScreen.z / platform.aspectRatio, platform.height / 2f + onScreen.y / onScreen.z);
+				
+				if(drawObjectNames) {
+					if(onScreen.z < 0) {
+						ImVec2 textSize;
+						igCalcTextSize(&textSize, name.toStringz);
+						ImDrawList_AddText(igGetWindowDrawList(), ImVec2(platform.width / 2f - onScreen.x / onScreen.z / platform.aspectRatio - textSize.x / 2f, platform.height / 2f + onScreen.y / onScreen.z - textSize.y / 2f), 0xFFFFFFFF, name.toStringz);
+						
+						if(io.MouseClicked[0]) {
+							vec2f mousePos = vec2f(io.MousePos.x, io.MousePos.y);
+							if((mousePos - fixedOnScreen).length < abs(150f / onScreen.z)) {
+								selectedObject = superObject;
+							}
+						}
+						
+						if((platform.cameraPosition - objPos.xyz).length < 15f)
+							ImDrawList_AddCircle(igGetWindowDrawList(), ImVec2(platform.width / 2f - onScreen.x / onScreen.z / platform.aspectRatio, platform.height / 2f + onScreen.y / onScreen.z), 150f / onScreen.z, 0xffffffff, 16);
+					}
+				}
+			}
+			catch(Throwable e) {
+				writecln("Exception");
+			}
+		}
+
+		if(drawUnspawnedObjects) {
+			if(superObject.type == 4) {
+				for(SuperObject** childSuperObject = superObject.engineObject.firstSuperObject; childSuperObject; childSuperObject = cast(SuperObject**)*(cast(int*)childSuperObject + 1)) {
+					
+					SuperObject* actualObject = *childSuperObject;
+					
+					SOStandardGameStruct* gameStruct = actualObject.engineObject.standardGameStruct;
+					
+					drawNames(actualObject);
+				}
+			}
+		}
+
+		foreach(child; superObject.getChildren()) {
+			drawNames(child);
+		}
+		
+		if(superObject.nextTwin)
+			drawNames(superObject.nextTwin);
+	}
+
 	void render(SuperObject* superObject, int depth = 0) {
 		if(superObject.type == 2) {
-			SOStandardGameStruct* gameStruct = superObject.info.standardGameStruct;
+			SOStandardGameStruct* gameStruct = superObject.engineObject.standardGameStruct;
 
-			RenderInfo* renderInfo = superObject.info.renderInfo;
+			RenderInfo* renderInfo = superObject.engineObject.renderInfo;
 
 			if(drawObjectCubes) {
 				auto rnd = Random(cast(uint)superObject);
@@ -120,24 +236,26 @@ void levelviewer(string[] args) {
 			}
 		}
 
-//		if(superObject.type == 4) {
-//			for(SuperObject** childSuperObject = superObject.info.firstSuperObject; childSuperObject; childSuperObject = cast(SuperObject**)*(cast(int*)childSuperObject + 1)) {
-//				
-//				SuperObject* actualObject = *childSuperObject;
-//				
-//				SOStandardGameStruct* gameStruct = actualObject.info.standardGameStruct;
-//				
-//				render(actualObject, depth++);
-//			}
-//		}
+		if(drawUnspawnedObjects) {
+			if(superObject.type == 4) {
+				for(SuperObject** childSuperObject = superObject.engineObject.firstSuperObject; childSuperObject; childSuperObject = cast(SuperObject**)*(cast(int*)childSuperObject + 1)) {
+					
+					SuperObject* actualObject = *childSuperObject;
+					
+					SOStandardGameStruct* gameStruct = actualObject.engineObject.standardGameStruct;
+					
+					render(actualObject, depth++);
+				}
+			}
+		}
 
 		if(superObject.type == 64 || superObject.type == 32 || superObject.type == 4) {
-			if(superObject.info && superObject.info.firstModel &&
-				superObject.info.firstModel.model_0_1 && superObject.info.firstModel.model_0_1.model_1_2 &&
-				superObject.info.firstModel.model_0_1.model_1_2.model_0_3) {
+			if(superObject.engineObject && superObject.engineObject.firstModel &&
+				superObject.engineObject.firstModel.model_0_1 && superObject.engineObject.firstModel.model_0_1.model_1_2 &&
+				superObject.engineObject.firstModel.model_0_1.model_1_2.model_0_3) {
 				try {
 					//printAddressInformation(superObject.info.firstModel.model_0_1.model_1_2.model_0_3);
-					drawModel(superObject.info.firstModel);
+					drawModel(superObject.engineObject.firstModel);
 				}
 				catch(Throwable e) { }
 			}
@@ -198,68 +316,6 @@ void levelviewer(string[] args) {
 			//render(cast(SuperObject*)0x2f915a0);
 	};
 
-	void drawNames(SuperObject* superObject) {
-		auto io = igGetIO();
-
-		if(superObject.type == 2) {
-			SOStandardGameStruct* gameStruct = superObject.info.standardGameStruct;
-
-			string name;
-			try {
-				name = (&gameStruct.name).fromStringz.idup;
-			}
-			catch(Throwable e) {
-				writecln("Error getting standard game struct name");
-			}
-
-			if(useGameCamera && name == "StdCamer") {
-				vec4f objPos = superObject.matrix.toMat4f.column(3);
-				platform.cameraPosition = objPos.xyz;
-				platform.cameraMatrix = superObject.matrix.toMat4f * mat4f.rotateZ(PI);
-			}
-
-			try {
-				mat4f m = mat4f();
-				glGetFloatv(GL_MODELVIEW_MATRIX, m.ptr);
-				m = m.transposed;
-
-				vec4f objPos = superObject.matrix.toMat4f.column(3);
-
-				auto onScreen = ((m * gfm.math.matrix.Matrix!(float, 4, 1).fromColumns([objPos]))
-					.column(0) - vec4f(0.5f, 0.5f, 0, 0)) * vec4f(platform.width / 2f, platform.height / 2f, 1, 0);
-
-				auto fixedOnScreen = vec2f(platform.width / 2f - onScreen.x / onScreen.z / platform.aspectRatio, platform.height / 2f + onScreen.y / onScreen.z);
-
-				if(drawObjectNames) {
-					if(onScreen.z < 0) {
-						ImVec2 textSize;
-						igCalcTextSize(&textSize, name.toStringz);
-						ImDrawList_AddText(igGetWindowDrawList(), ImVec2(platform.width / 2f - onScreen.x / onScreen.z / platform.aspectRatio - textSize.x / 2f, platform.height / 2f + onScreen.y / onScreen.z - textSize.y / 2f), 0xFFFFFFFF, name.toStringz);
-
-						if(io.MouseClicked[0]) {
-							vec2f mousePos = vec2f(io.MousePos.x, io.MousePos.y);
-							if((mousePos - fixedOnScreen).length < abs(150f / onScreen.z)) {
-								selectedObject = superObject;
-							}
-						}
-
-						if((platform.cameraPosition - objPos.xyz).length < 15f)
-							ImDrawList_AddCircle(igGetWindowDrawList(), ImVec2(platform.width / 2f - onScreen.x / onScreen.z / platform.aspectRatio, platform.height / 2f + onScreen.y / onScreen.z), 150f / onScreen.z, 0xffffffff, 16);
-					}
-				}
-			}
-			catch(Throwable e) {
-				writecln("Exception");
-			}
-		}
-		foreach(child; superObject.getChildren()) {
-			drawNames(child);
-		}
-		
-		if(superObject.nextTwin)
-			drawNames(superObject.nextTwin);
-	}
-
 	platform.updateDelegate = (dt) {
 		auto io = igGetIO();
 
@@ -281,15 +337,15 @@ void levelviewer(string[] args) {
 		igBegin("Options");
 		igCheckbox("Draw object names", &drawObjectNames);
 		igCheckbox("Draw object cubes", &drawObjectCubes);
+		igCheckbox("Draw unspawned objects", &drawUnspawnedObjects);
 		igCheckbox("Use game camera", &useGameCamera);
 		version(dll) {
-			static bool paused = false;
-			if(!paused && igButton("Pause Rayman 2")) {
-				paused = true;
+			if(!pauseEngine && igButton("Pause Rayman 2")) {
+				pauseEngine = true;
 				// TODO: Make this actually pause Rayman
 			}
-			else if(paused && igButton("Unpause Rayman 2")) {
-				paused = false;
+			else if(pauseEngine && igButton("Unpause Rayman 2")) {
+				pauseEngine = false;
 			}
 		}
 		igEnd();
@@ -303,8 +359,10 @@ void levelviewer(string[] args) {
 		}
 
 		version(dll) {
-			auto fn_vInsertObjectInSectorList = cast(SectorInfo* function(SuperObject* sector, SuperObject* object))0x00412740;
-			auto fn_vInsertActorInDynamicHierarchy = cast(SectorInfo* function(SuperObject* actor, ubyte))0x040B4C0;
+			auto fn_vInsertObjectInSectorList = cast(EngineObject* function(SuperObject* sector, SuperObject* object))0x00412740;
+			auto fn_vInsertActorInDynamicHierarchy = cast(EngineObject* function(SuperObject* actor, ubyte))0x040B4C0;
+			auto HIE_fn_vDestroySuperObject = cast(void function(SuperObject* superObject))0x45BC60;
+			auto fn_vDesinitOneObject = cast(void function(SuperObject* superObject))0x405D10;
 
 			static SNAFormat sna = null;
 			static SNAFormat levelSna = null;
@@ -313,7 +371,7 @@ void levelviewer(string[] args) {
 			igBegin("Test");
 			if(!sna) {
 				if(igButton("Load external SNA")) {
-					enum levelsDir = r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\";
+					enum levelsDir = r"D:\GOG Games\Rayman 2\Rayman 2 Modded\Data\World\Levels\\";
 					
 					sna = new SNAFormat(levelsDir ~ "Fix.sna");
 					sna.relocatePointersUsingFile(levelsDir ~ "Fix.rtb");
@@ -323,10 +381,10 @@ void levelviewer(string[] args) {
 
 					enum levelName = "Chase_10";
 					
-					levelSna = new SNAFormat(levelsDir ~ levelName ~ r"\" ~ levelName ~ ".sna");
+					levelSna = new SNAFormat(levelsDir ~ levelName ~ r"\\" ~ levelName ~ ".sna");
 					levelSna.relocatePointersUsingBigFileAuto(levelsDir ~ "LEVELS0.DAT");
 					readRelocationTableFromBigFileAuto(levelsDir ~ "LEVELS0.DAT", levelName, RelocationTableType.gpt);
-					levelGpt = new LevelGPT(levelsDir ~ levelName ~ r"\" ~ levelName ~ ".gpt");
+					levelGpt = new LevelGPT(levelsDir ~ levelName ~ r"\\" ~ levelName ~ ".gpt");
 				}
 			}
 			else {
@@ -354,18 +412,51 @@ void levelviewer(string[] args) {
 					writecln("Inserted world into selected object");
 				}
 			}
+
+			if(igButton("Activate all inactive actors")) {
+				SuperObject* gp_stInactiveDynamicWorld = *cast(SuperObject**)0x500FC4;
+
+				void insertInDynamicWorld(SuperObject* so) {
+					foreach(child; so.getChildren) {
+						fn_vInsertActorInDynamicHierarchy(child, 0);
+						insertInDynamicWorld(child);
+					}
+				}
+
+				insertInDynamicWorld(gp_stInactiveDynamicWorld);
+			}
+
 			igEnd();
 		}
 
 		if(selectedObject && selectedObject.type <= 64) {
 			igBegin("Selected object");
 
-			SOStandardGameStruct* gameStruct = selectedObject.info.standardGameStruct;
+			if(igCollapsingHeader("Extra data")) {
+				igText("SuperObject: 0x%s".format(selectedObject).toStringz);
+				igText("SuperObject type: %s".format(selectedObject.type).toStringz);
+				if(selectedObject.parent) {
+					string parentName;
+					if(selectedObject.parent.type == 2)
+						parentName = selectedObject.parent.engineObject.standardGameStruct.strName;
+					else if(selectedObject.parent == *cast(SuperObject**)0x500FC4)
+						parentName = "gp_stInactiveDynamicWorld";
+					else if(selectedObject.parent == *cast(SuperObject**)0x500FD0)
+						parentName = "gp_stDynamicWorld";
+					else
+						parentName = "No name - 0x%s - type %s".format(selectedObject.parent, selectedObject.parent.type);
+					igText("Parent: %s".format(parentName).toStringz);
+				}
+				igText("EngineObject: 0x%s".format(selectedObject.engineObject).toStringz);
+				igText("Mind: 0x%s".format(selectedObject.engineObject.mind).toStringz);
+			}
+
+			SOStandardGameStruct* gameStruct = selectedObject.engineObject.standardGameStruct;
 
 			igText(&gameStruct.name);
 
-			if(selectedObject.info.hasDynamics) {
-				auto dynamics = (*selectedObject.info.dynamics);
+			if(selectedObject.engineObject.hasDynamics) {
+				auto dynamics = (*selectedObject.engineObject.dynamics);
 				igInputFloat3("Position", *cast(float[3]*)&dynamics.position);
 				igInputFloat3("Position (matrix)", *cast(float[3]*)&selectedObject.matrix.fields[1]);
 				igInputFloat3("Scale", *cast(float[3]*)&dynamics.scale);
@@ -375,29 +466,48 @@ void levelviewer(string[] args) {
 			else
 				igInputFloat3("Position", *cast(float[3]*)&selectedObject.matrix.fields[1]);
 
-			igCheckbox("Is camera", (cast(bool*)&selectedObject.info.isCamera + 3));
+			igCheckbox("Is camera", (cast(bool*)&selectedObject.engineObject.isCamera + 3));
 
-			static SectorInfo* engineObject;
-			static void* aiPointer;
+			if(igButton("Make inactive")) {
+				SuperObject* gp_stInactiveDynamicWorld = *cast(SuperObject**)0x500FC4;
+				selectedObject.parent = gp_stInactiveDynamicWorld;
+			}
+
+			version(dll)
+			if(igButton("Destroy")) {
+				HIE_fn_vDestroySuperObject(selectedObject);
+				selectedObject = null;
+			}
+
+			static EngineObject* engineObject;
+			static Mind* mindPointer;
+
+			if(igButton("Teleport to camera")) {
+				if(selectedObject.engineObject.hasDynamics) {
+					auto dynamics = (*selectedObject.engineObject.dynamics);
+					auto cam = platform.cameraPosition;
+					dynamics.position = [ cam.x, cam.y, cam.z ];
+				}
+			}
 
 			if(igButton("Copy engine object"))
-				engineObject = selectedObject.info;
+				engineObject = selectedObject.engineObject;
 
-			if(igButton("Copy ai pointer"))
-				aiPointer = selectedObject.info.aiPointer;
+			if(igButton("Copy mind pointer"))
+				mindPointer = selectedObject.engineObject.mind;
 
 			if(engineObject && igButton("Paste engine object"))
-				selectedObject.info = engineObject;
+				selectedObject.engineObject = engineObject;
 			
-			if(aiPointer && igButton("Paste ai pointer"))
-				selectedObject.info.aiPointer = aiPointer;
+			if(mindPointer && igButton("Paste mind pointer"))
+				selectedObject.engineObject.mind = mindPointer;
 
 			if(igCollapsingHeader("Children")) {
 				foreach(child; selectedObject.getChildren()) {
 					string buttonName = "Type: " ~ child.type.to!string;
 
 					if(child.type == 2)
-						buttonName ~= ", " ~ (&child.info.standardGameStruct.name).fromStringz;
+						buttonName ~= ", " ~ (&child.engineObject.standardGameStruct.name).fromStringz;
 
 					if(igButton(buttonName.toStringz) &&  child.type == 2) {
 						selectedObject = child;
@@ -414,6 +524,25 @@ void levelviewer(string[] args) {
 							gameStruct.customBits |= (1 << i);
 					}
 				}
+			}
+
+			version(dll)
+			if(igCollapsingHeader("AI")) {
+				if(igButton("Disable rules")) {
+					selectedObject.engineObject.mind.normalIntelligence.rules = null;
+				}
+
+				if(igButton("Disable reflex")) {
+					selectedObject.engineObject.mind.normalIntelligence.field_8 = null;
+				}
+
+				if(selectedObject in forceTrueConditionSuperObjects && forceTrueConditionSuperObjects[selectedObject]) {
+					if(igButton("Disable force true conditions"))
+						forceTrueConditionSuperObjects[selectedObject] = false;
+				}
+				else
+					if(igButton("Force true conditions"))
+						forceTrueConditionSuperObjects[selectedObject] = true;
 			}
 
 			igEnd();

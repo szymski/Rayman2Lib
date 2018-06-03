@@ -2,7 +2,7 @@ import std.stdio;
 
 version(exe) void main(string[] args)
 {
-	debug args ~= "levelviewer"; // Use this to run a handler in debug mode
+	debug args ~= "extracttables"; // Use this to run a handler in debug mode
 
 	// Print usage instruction, if no parameter given
 	if(args.length <= 1) {
@@ -57,7 +57,7 @@ mixin template registerHandlers(string moduleName = __MODULE__) {
 		mixin("import thisModule = " ~ moduleName ~ ";");
 
 		foreach(member; __traits(allMembers, thisModule)) {
-			static if(isSomeFunction!(mixin(member)) && hasUDA!(mixin(member), handler)) 
+			static if(isFunction!(mixin(member)) && hasUDA!(mixin(member), handler)) 
 				mixin("app.handlers[`" ~ member ~ "`] = &" ~ member ~ ";");
 		}
 	}

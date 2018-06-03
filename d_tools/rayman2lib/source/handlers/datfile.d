@@ -1,7 +1,7 @@
 ﻿module handlers.datfile;
 
 import std.stdio, std.file, std.path, std.algorithm, std.traits, std.array, std.conv, std.string, consoled, imageformats, std.math;
-import app, decoder, formats.pointertable, formats.relocationtable, formats.sna, formats.cnt, formats.gf, global, utils, structures.superobject, formats.datfile;
+import app, decoder, formats.pointertable, formats.relocationtable, formats.sna, formats.cnt, formats.gf, formats.datfile, global, utils, structures.superobject, formats.datfile;
 
 mixin registerHandlers;
 
@@ -18,12 +18,30 @@ void readdat(string[] args) {
 
 	File f = File(args[0]);
 
-	uint table = 0xF40E0005;
-	uint dataOffset = f.getOffsetInBigFile(table);
-	uint magic = getMagicForTable(table);
+	File fout2 = File("output/out.bin", "wb");
 
-	f.seek(dataOffset);
+	foreach(k; 0 .. 16)
+	foreach(j; 0 .. 16)
+	foreach(i; 0 .. 16) {
+		SplitInt id;
+		id = cast(ubyte)i; // Level id
+		id.byte1 = cast(ubyte)j; // Relocation table type
+		id.byte2 = cast(ubyte)k;
+		id.byte3 = cast(ubyte)k;
 
-	auto data = f.readEncoded!(ubyte[1000])(magic);
-	printMemory(data.ptr, 1000);
+		uint magic = getMagicForTable(id);
+		uint offset = getOffsetInBigFile(f, id);
+		writeln(offset);
+
+//		File fout = File("output/%s.bin".format(i), "wb");
+
+		f.seek(offset);
+		ubyte[] data = f.readEncoded!(ubyte[10240])(magic);
+		fout2.rawWrite(data);
+//		fout.rawWrite(data);
+
+//		fout.close();
+	}
+
+	fout2.close();
 }

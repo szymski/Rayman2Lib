@@ -85,9 +85,31 @@ class Platform {
 		io.DisplaySize = ImVec2(cast(float)width, cast(float)height);
 		
 		while(_running) {
-			if(!engineUpdating && !canUpdateEngine) {
-				canUpdateEngine = false;
+			version(dll)
+				if(!engineUpdating && !canUpdateEngine) {
+					canUpdateEngine = false;
 
+					igNewFrame();
+					
+					updateEvents();
+					
+					try {
+						if(updateDelegate)
+							updateDelegate(time - _lastTime);
+					}
+					catch(Throwable e) {
+						writecln("Error in update delegate");
+						writecln(e.toString);
+					}
+					
+					_lastTime = time;
+					
+					render();
+					limitFps();
+
+					canUpdateEngine = true;
+				}
+			version(exe) {
 				igNewFrame();
 				
 				updateEvents();
@@ -105,8 +127,6 @@ class Platform {
 				
 				render();
 				limitFps();
-
-				canUpdateEngine = true;
 			}
 		}
 		

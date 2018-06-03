@@ -21,7 +21,7 @@ struct Matrix {
 struct SuperObject {
 	uint type;
 	union {
-		SectorInfo* info;
+		EngineObject* engineObject;
 		Model_0_0* firstModel; // For type 8
 	}
 	SuperObject* firstChild;
@@ -64,8 +64,7 @@ struct SuperObject {
 	}
 }
 
-// EngineObject
-struct SectorInfo {
+struct EngineObject {
 	union {
 		Model_0_0* firstModel; // For type 32
 		SuperObject** firstSuperObject;  // For type 4
@@ -73,13 +72,13 @@ struct SectorInfo {
 	}
 	union {
 		void* radiosity; // For type 32
-		SOStandardGameStruct* standardGameStruct;
+		SOStandardGameStruct* standardGameStruct; // For type 2
 	}
 	union {
 		void* lightType;
 		DNM_stDynamics** dynamics; // For type 4
 	}
-	void* aiPointer;
+	Mind* mind;
 	int isCamera;
 	ubyte[76] unknown1;
 	ubyte* minPointInBorder;
@@ -125,5 +124,54 @@ struct DNM_stDynamics {
 	float float70;
 	float float74;
 	float[3] *vector_B;
-	float[3] *position;
+	float[3] position;
+}
+
+struct Mind {
+	Intelligence* normalIntelligence;
+}
+
+struct Intelligence {
+	uint field_0;
+	void* rules;
+	IntelligenceField8* field_8;
+	uint field_C;
+	IntelligenceField10* field_10;
+}
+
+struct IntelligenceField8 {
+	tdstNodeInterpret** firstNode;
+	uint field_4;
+	ubyte byte_8;
+}
+
+struct IntelligenceField10 {
+	ubyte* field_0;
+	ubyte field_4;
+	ubyte field_5;
+	ubyte field_6;
+	ubyte field_7;
+}
+
+struct tdstNodeInterpret {
+	int tableIndex;
+	ubyte field_4;
+	ubyte field_5;
+	ubyte param;
+	ubyte functionType;
+
+	tdstNodeInterpret* prevNode() {
+		return &this - 1;
+	}
+
+	tdstNodeInterpret* nextNode() {
+		return &this + 1;
+	}
+}
+
+struct tdstGetSetParam {
+	int conditionByte;
+	int parameter_2;
+	int parameter_3;
+	int type;
 }

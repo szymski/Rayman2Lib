@@ -10,6 +10,7 @@ import core.sys.windows.winnt;
 import core.sys.windows.dbghelp;
 import core.stdc.signal;
 import detours;
+import structures.superobject;
 
 pragma(lib, "detours");
 
@@ -101,6 +102,7 @@ void onAttach() {
 __gshared extern(C):
 
 auto DrawFrame = cast(char function())0x401160;
+auto fn_p_stBooleanCondition = cast(tdstNodeInterpret* function(SuperObject* superObject, tdstNodeInterpret* node, tdstGetSetParam* getSetParam))0x489B40;
 
 void detourFunctions() {
 	writeln("Detouring functions...");
@@ -110,6 +112,7 @@ void detourFunctions() {
 	DetourUpdateThread(GetCurrentThread());
 	
 	DetourAttach(&DrawFrame, &NEW_DrawFrame);
+	DetourAttach(&fn_p_stBooleanCondition, &NEW_fn_p_stBooleanCondition);
 	
 	DetourTransactionCommit();
 
@@ -119,15 +122,32 @@ void detourFunctions() {
 bool canUpdateEngine = true;
 bool engineUpdating = false;
 bool engineUpdated = false;
+bool pauseEngine = false;
 
 char NEW_DrawFrame() {
+	char result = 0;
+
 	if(!canUpdateEngine)
 		return 0;
 
 	engineUpdating = true;
-	auto result = DrawFrame();
+	if(!pauseEngine)
+		result = DrawFrame();
+
 	engineUpdating = false;
 	canUpdateEngine = false;
 
+	return result;
+}
+
+bool[SuperObject*] forceTrueConditionSuperObjects;
+
+import std.random;
+
+tdstNodeInterpret* NEW_fn_p_stBooleanCondition(SuperObject* superObject, tdstNodeInterpret* node, tdstGetSetParam* getSetParam)
+{
+	tdstNodeInterpret* result = fn_p_stBooleanCondition(superObject, node, getSetParam);
+	if(superObject in forceTrueConditionSuperObjects && forceTrueConditionSuperObjects[superObject])
+		getSetParam.conditionByte = uniform(0, 2);
 	return result;
 }

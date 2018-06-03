@@ -79,18 +79,18 @@ void modelviewer(string[] args) {
 	
 	void render(SuperObject* superObject, int depth = 0) {
 		if(superObject.type == 2) {
-			SOStandardGameStruct* gameStruct = superObject.info.standardGameStruct;
+			SOStandardGameStruct* gameStruct = superObject.engineObject.standardGameStruct;
 			
-			RenderInfo* renderInfo = superObject.info.renderInfo;
+			RenderInfo* renderInfo = superObject.engineObject.renderInfo;
 		}
 		
 		if(superObject.type == 64 || superObject.type == 32 || superObject.type == 4) {
-			if(superObject.info && superObject.info.firstModel &&
-				superObject.info.firstModel.model_0_1 && superObject.info.firstModel.model_0_1.model_1_2 &&
-				superObject.info.firstModel.model_0_1.model_1_2.model_0_3) {
+			if(superObject.engineObject && superObject.engineObject.firstModel &&
+				superObject.engineObject.firstModel.model_0_1 && superObject.engineObject.firstModel.model_0_1.model_1_2 &&
+				superObject.engineObject.firstModel.model_0_1.model_1_2.model_0_3) {
 				try {
 					//printAddressInformation(superObject.info.firstModel.model_0_1.model_1_2.model_0_3);
-					drawModel(superObject.info.firstModel);
+					drawModel(superObject.engineObject.firstModel);
 				}
 				catch(Throwable e) { }
 			}
@@ -139,7 +139,7 @@ void modelviewer(string[] args) {
 //			render(*cast(SuperObject**)0x500FD0);
 
 		version(exe) {
-			SectorInfo* info = cast(SectorInfo*)(levelSna.data.ptr + 0x4DC1);
+			EngineObject* info = cast(EngineObject*)(levelSna.data.ptr + 0x4DC1);
 		
 			RenderInfo* renderInfo = info.renderInfo;
 			

@@ -6,7 +6,7 @@ import std.stdio, std.conv;
 import std.algorithm : countUntil;
 import std.string : toLower;
 
-private uint magic = 0;
+uint magic = 0;
 
 /**
 	Reads relocation table from specific position from big file LEVELS0.DAT.
@@ -25,7 +25,8 @@ void readRelocationTableFromBigFile(string filename, uint position, uint magic) 
 enum RelocationTableType {
 	rtb = 0,
 	gpt = 1,
-	rts = 2, // NOT SURE
+	rts = 2,
+	rtt = 3,
 }
 
 /**
@@ -52,7 +53,7 @@ void readRelocationTableFromBigFileAuto(string filename, string levelname, Reloc
 /**
 	Gets level id based on name. The id is a relocation table id.
 */
-private uint getLevelId(string filename) {
+uint getLevelId(string filename) {
 	filename = filename.toLower;
 	return levelList.countUntil!(l => l.toLower == filename);
 }
@@ -70,7 +71,7 @@ void readRelocationTableFromFile(string filename) {
 	pointerRelocationInfoIndex = 0;
 }
 
-private void initBigFile(File f, uint position, uint initialMagic) {
+void initBigFile(File f, uint position, uint initialMagic) {
 	f.seek(position, SEEK_SET);
 	magic = initialMagic;
 
@@ -90,6 +91,7 @@ private void parseBigFile(File f) {
 		ubyte moduleId = f.readEncoded!ubyte;
 		ubyte blockId = f.readEncoded!ubyte;
 		uint size = f.readEncoded!uint;
+		relocationEntryCount = size;
 
 		relocationHeaders ~= PointerRelocationHeader(moduleId, blockId, lRelocationKeyValuesIndex, size);
 
@@ -120,7 +122,7 @@ private T readEncoded(T)(File f) {
 private void parseFile(File f) {
 	ubyte count = f.readType!ubyte;
 	
-	f.readType!uint;
+	f.readType!uint; // Remove for demo version to work
 	
 	int lRelocationKeyValuesIndex = 0;
 
@@ -130,6 +132,7 @@ private void parseFile(File f) {
 		ubyte moduleId = f.readType!ubyte;
 		ubyte blockId = f.readType!ubyte;
 		uint size = f.readType!uint;
+		relocationEntryCount = size;
 
 		relocationHeaders ~= PointerRelocationHeader(moduleId, blockId, lRelocationKeyValuesIndex, size);
 		

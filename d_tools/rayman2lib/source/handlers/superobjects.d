@@ -20,7 +20,7 @@ void superobjects(string[] args) {
 	readRelocationTableFromFile(levelsDir ~ "Fix.rtp");
 	FixGPT fixGpt = new FixGPT(levelsDir ~ "Fix.gpt");
 
-	enum levelName = "Chase_10";
+	enum levelName = "Learn_30";
 
 	SNAFormat levelSna = new SNAFormat(levelsDir ~ levelName ~ r"\" ~ levelName ~ ".sna");
 	levelSna.relocatePointersUsingBigFileAuto(levelsDir ~ "LEVELS0.DAT");
@@ -36,13 +36,13 @@ void superobjects(string[] args) {
 
 		writeln("Type: ", superObject.type);
 		if(superObject.type == 2) {
-			SOStandardGameStruct* gameStruct = superObject.info.standardGameStruct;
-			printAddressInformation(gameStruct);
+			SOStandardGameStruct* gameStruct = superObject.engineObject.standardGameStruct;
+			printAddressInformation(superObject);
 
 			auto objectName = (&gameStruct.name).fromStringz.idup;
 			writeln(objectName);
 
-			RenderInfo* renderInfo = superObject.info.renderInfo;
+			RenderInfo* renderInfo = superObject.engineObject.renderInfo;
 
 			if(renderInfo.dword10) {
 				void* v7 = *cast(void**)(renderInfo.dword10 + 4);
@@ -60,12 +60,12 @@ void superobjects(string[] args) {
 		}
 
 		if(superObject.type == 4) {
-			for(SuperObject** childSuperObject = superObject.info.firstSuperObject; childSuperObject; childSuperObject = cast(SuperObject**)*(cast(int*)childSuperObject + 1)) {
+			for(SuperObject** childSuperObject = superObject.engineObject.firstSuperObject; childSuperObject; childSuperObject = cast(SuperObject**)*(cast(int*)childSuperObject + 1)) {
 				write(tabStr); printAddressInformation(childSuperObject);
 
 				SuperObject* actualObject = *childSuperObject;
 
-				SOStandardGameStruct* gameStruct = actualObject.info.standardGameStruct;
+				SOStandardGameStruct* gameStruct = actualObject.engineObject.standardGameStruct;
 				write(tabStr); writeln((&gameStruct.name).fromStringz);
 
 				process(actualObject, depth++);
@@ -79,7 +79,7 @@ void superobjects(string[] args) {
 			process(superObject.nextTwin);
 	}
 
-	//process(levelGpt.SECT_hFatherSector);
+	process(levelGpt.SECT_hFatherSector);
 
 
 
@@ -88,7 +88,7 @@ void superobjects(string[] args) {
 
 
 
-	SectorInfo* info = cast(SectorInfo*)(levelSna.data.ptr + 0x4DC1);
+	EngineObject* info = cast(EngineObject*)(levelSna.data.ptr + 0x4DC1);
 	
 	RenderInfo* renderInfo = info.renderInfo;
 	
@@ -160,10 +160,10 @@ void exportallmaps(string[] args) {
 
 void exportStaticWorld(SuperObject* superObject, string path = "models") {
 	foreach(currSuperObject; superObject.getTwins()) {
-		if(currSuperObject.info) {
+		if(currSuperObject.engineObject) {
 			if(currSuperObject.type == 32 || currSuperObject.type == 8 || currSuperObject.type == 4)
-				if(currSuperObject.info.firstModel)
-					exportModel(currSuperObject.info.firstModel, path);
+				if(currSuperObject.engineObject.firstModel)
+					exportModel(currSuperObject.engineObject.firstModel, path);
 		}
 		
 		if(currSuperObject.firstChild)
