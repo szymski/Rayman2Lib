@@ -27,26 +27,33 @@ namespace BNKReader
 
         private void decodeButton_Click(object sender, EventArgs e)
         {
-            if (openFileDialog1.ShowDialog() == DialogResult.OK && File.Exists(openFileDialog1.FileName))
-            {
-                BNMFile bnm = new BNMFile(File.ReadAllBytes(openFileDialog1.FileName));
+            openFileDialog1.Multiselect = true;
+            if (openFileDialog1.ShowDialog() == DialogResult.OK) {
+                string dir = "";
+                foreach (var fileName in openFileDialog1.FileNames) {
+                    if (File.Exists(fileName)) {
+                        BNMFile bnm = new BNMFile(File.ReadAllBytes(fileName));
 
-                var fileInfo = new FileInfo(openFileDialog1.FileName);
-                var dir = fileInfo.DirectoryName + "/" + fileInfo.Name.Replace(".bnm", "");
+                        var fileInfo = new FileInfo(fileName);
+                        dir = Path.Combine(fileInfo.DirectoryName, fileInfo.Name.Replace(".bnm", ""));
 
-                Directory.CreateDirectory(dir);
+                        Directory.CreateDirectory(dir);
 
-                int file = 0;
-                foreach (var soundFile in bnm.soundFiles)
-                {
-                    var filename = dir + "/" + (addIndexCheckBox.Checked ? file++ + "_" : "") + soundFile.name;
+                        int file = 0;
+                        foreach (var soundFile in bnm.soundFiles) {
+                            var filename = Path.Combine(dir, (addIndexCheckBox.Checked ? file++ + "_" : "") + soundFile.name);
 
-                    if (File.Exists(filename))
-                        File.Delete(filename);
-                    soundFile.Save(File.Create(filename));
+                            if (File.Exists(filename))
+                                File.Delete(filename);
+                            soundFile.Save(File.Create(filename));
+                        }
+                    }
                 }
 
-                Process.Start(dir);
+                ProcessStartInfo startInfo = new ProcessStartInfo(dir);
+                startInfo.UseShellExecute = true;
+
+                Process.Start(startInfo);
             }
         }
     }
